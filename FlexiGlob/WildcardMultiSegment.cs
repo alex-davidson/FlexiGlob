@@ -1,4 +1,6 @@
-﻿namespace FlexiGlob
+﻿using FlexiGlob.Matching;
+
+namespace FlexiGlob
 {
     public class WildcardMultiSegment : Segment
     {
@@ -7,5 +9,7 @@
         public WildcardMultiSegment() : base("**")
         {
         }
+
+        public override SegmentMatchResult Match(string candidate, bool caseSensitive) => SegmentMatchResult.Match;
     }
 }

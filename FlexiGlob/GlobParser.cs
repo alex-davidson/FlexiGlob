@@ -55,6 +55,18 @@ namespace FlexiGlob
             return new Glob(root, segments);
         }
 
+        public T ParseSingleSegment<T>(string pattern) where T : Segment
+        {
+            if (pattern == "") throw new ArgumentException("Pattern is empty.", nameof(pattern));
+
+            var context = new ParseContext(pattern);
+            var tokens = new GlobPathTokeniser().Tokenise(context).ToArray();
+            var segments = new GlobPathParser(Variables.ToArray()).Parse(context, tokens).ToArray();
+
+            if (segments.Length != 1) throw new ArgumentException($"Pattern parsed as {segments.Length} segments.", nameof(pattern));
+            return segments.Single() as T ?? throw new ArgumentException($"Pattern parsed as a segment of type {segments.Single().GetType()} segments.", nameof(pattern));
+        }
+
         private static RootSegment? TryParseRoot(ParseContext context, out int offset)
         {
             offset = 0;
