@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using FlexiGlob.Parsing;
 
@@ -34,6 +35,8 @@ namespace FlexiGlob
     /// </remarks>
     public class GlobParser
     {
+        public List<GlobVariable> Variables { get; } = new List<GlobVariable>();
+
         public Glob Parse(string pattern)
         {
             if (pattern.TrimStart() != pattern) throw new ArgumentException("Leading whitespace is not permitted.", nameof(pattern));
@@ -47,7 +50,7 @@ namespace FlexiGlob
 
             var context = new ParseContext(pathPattern);
             var tokens = new GlobPathTokeniser().Tokenise(context).ToArray();
-            var segments = new GlobPathParser().Parse(context, tokens).ToArray();
+            var segments = new GlobPathParser(Variables.ToArray()).Parse(context, tokens).ToArray();
 
             return new Glob(root, segments);
         }

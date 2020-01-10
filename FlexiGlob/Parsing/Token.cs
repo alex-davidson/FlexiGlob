@@ -21,5 +21,7 @@
             new Token { Type = TokenType.MatchRangeInverted, Value = characters, Start = start, End = end };
         public static Token MatchSingle(int start, int end) =>
             new Token { Type = TokenType.MatchSingle, Start = start, End = end };
+        public static Token MatchVariable(string name, int start, int end) =>
+            new Token { Type = TokenType.MatchVariable, Value = name, Start = start, End = end };
     }
 }

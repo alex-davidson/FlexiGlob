@@ -9,5 +9,6 @@
         MatchRange = 4,
         MatchRangeInverted = 5,
         MatchSingle = 6,
+        MatchVariable = 7,
     }
 }

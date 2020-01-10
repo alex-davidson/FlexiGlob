@@ -9,6 +9,13 @@ namespace FlexiGlob.Parsing
 {
     internal class GlobPathParser
     {
+        private readonly Dictionary<string, GlobVariable> variables;
+
+        public GlobPathParser(GlobVariable[] variables)
+        {
+            this.variables = variables.ToDictionary(v => v.Name);
+        }
+
         public IEnumerable<Segment> Parse(ParseContext context, Token[] tokens)
         {
             // Assumptions:
@@ -50,7 +57,7 @@ namespace FlexiGlob.Parsing
                 return new FixedSegment(leadingLiteralText);
             }
 
-            var regex = CompileRegex(tokens);
+            var regex = CompileRegex(context, tokens);
             var original = context.GetOriginalText(tokens);
             return new WildcardSegment(original, regex, leadingLiteralText);
         }
@@ -61,19 +68,19 @@ namespace FlexiGlob.Parsing
             if (literal.Trim() == "..") throw context.CreateError("Relative segment '..' cannot be used within a globbed path.", start);
         }
 
-        private string CompileRegex(List<Token> tokens)
+        private string CompileRegex(ParseContext context, List<Token> tokens)
         {
             var builder = new StringBuilder(32);
             builder.Append("^");
             foreach (var token in tokens)
             {
-                AddRegexForToken(builder, token);
+                AddRegexForToken(context, builder, token);
             }
             builder.Append("$");
             return builder.ToString();
         }
 
-        private void AddRegexForToken(StringBuilder builder, Token token)
+        private void AddRegexForToken(ParseContext context, StringBuilder builder, Token token)
         {
             switch (token.Type)
             {
@@ -105,6 +112,15 @@ namespace FlexiGlob.Parsing
 
                 case TokenType.MatchSingle:
                     builder.Append(".");
+                    break;
+
+                case TokenType.MatchVariable:
+                    if (!variables.TryGetValue(token.Value, out var variable)) throw context.CreateError($"Variable is not defined: {token.Value}", token);
+                    builder.Append("(?<");
+                    builder.Append(variable.Name);
+                    builder.Append(">(");
+                    builder.Append(variable.RegexPattern);
+                    builder.Append("))");
                     break;
 
                 default:

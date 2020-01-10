@@ -34,8 +34,8 @@ namespace FlexiGlob.Parsing
             return globPattern.Substring(0, end);
         }
 
-        private static readonly char[] beginSpecialChars = { '*', '[', '?', EscapePrefix, SegmentSeparator };
-        private static readonly char[] wildcardChars = { '*', '[', '?', ']' };
+        private static readonly char[] beginSpecialChars = { '*', '[', '{', '?', EscapePrefix, SegmentSeparator };
+        private static readonly char[] wildcardChars = { '*', '[', '?', ']', '{', '}' };
         private static readonly Regex rxRange = new Regex(@"^!?(?!!)([^-]-[^-]|[^-]+)$", RegexOptions.Compiled);
 
         private string ReadLiteral(GlobPatternReader reader, char[] terminators)
@@ -87,6 +87,17 @@ namespace FlexiGlob.Parsing
                 var rangeCharacters = m.Groups[1].Value;
                 if (range[0] == '!') return Token.MatchRangeInverted(rangeCharacters, start, reader.Position);
                 return Token.MatchRange(rangeCharacters, start, reader.Position);
+            }
+            if (reader.TryRead('{'))
+            {
+                var variableName = reader.ReadUntilAny(wildcardChars);
+                if (!reader.TryRead('}'))
+                {
+                    throw reader.IsEndOfPattern
+                        ? context.CreateError($"Variable reference at position {start} is not closed: {reader.GetSnippet(start, variableName.Length + 1)}", start)
+                        : context.CreateError($"Variable reference at position {start} contains an invalid character: {reader.GetSnippet(5)}", start);
+                }
+                return Token.MatchVariable(variableName, start, reader.Position);
             }
             throw context.CreateError($"Unable to parse wildcard expression at position {start}: {reader.GetSnippet(start, 10)}", start);
         }

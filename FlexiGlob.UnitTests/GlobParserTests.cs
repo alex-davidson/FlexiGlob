@@ -145,6 +145,47 @@ namespace FlexiGlob.UnitTests
             Assert.That(() => new GlobParser().Parse(pattern), Throws.InstanceOf<GlobFormatException>());
         }
 
+        [Test]
+        public void IncludesValidVariableCaptures()
+        {
+            var parser = new GlobParser
+            {
+                Variables =
+                {
+                    new GlobVariable("yyyy", @"\d{4}"),
+                    new GlobVariable("MM", @"\d{2}"),
+                    new GlobVariable("dd", @"\d{2}")
+                }
+            };
+
+            var glob = parser.Parse("./logs-{yyyy}/{MM}{dd}/*.log");
+
+            Assert.That(glob.Root, Is.Null);
+            Assert.That(glob.Segments,
+                Is.EqualTo(new []
+                {
+                    new WildcardSegment("logs-{yyyy}", @"^logs-(?<yyyy>(\d{4}))$", "logs-"),
+                    new WildcardSegment("{MM}{dd}", @"^(?<MM>(\d{2}))(?<dd>(\d{2}))$", ""),
+                    new WildcardSegment("*.log", @"^.*\.log$", ""),
+                })
+                .Using(new SegmentEqualityComparer()));
+        }
+
+        [Test]
+        public void RejectsUndefinedVariableCaptures()
+        {
+            var parser = new GlobParser
+            {
+                Variables =
+                {
+                    new GlobVariable("MM", @"\d{2}"),
+                    new GlobVariable("dd", @"\d{2}")
+                }
+            };
+
+            Assert.That(() => parser.Parse("./logs-{missing}/{MM}{dd}/*.log"), Throws.InstanceOf<GlobFormatException>());
+        }
+
         public class Case
         {
             public string? Pattern { get; set; }
