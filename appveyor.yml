@@ -1,0 +1,23 @@
+image: Visual Studio 2019
+platform: Any CPU
+configuration: Release
+
+before_build:
+  - nuget restore
+
+build:
+  parallel: true
+  project: FlexiGlob.sln
+
+test_script:
+  - cmd: dotnet test FlexiGlob.UnitTests\bin\%CONFIGURATION%\netcoreapp3.0\FlexiGlob.UnitTests.dll
+
+artifacts:
+  - path: FlexiGlob\bin\$(configuration)\FlexiGlob.*.nupkg
+
+notifications:
+  # Email
+  - provider: Email
+    to:
+      - alex.davidson@bluewire-technologies.com
+      

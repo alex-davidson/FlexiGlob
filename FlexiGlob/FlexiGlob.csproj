@@ -3,6 +3,9 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <Nullable>enable</Nullable>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Version>0.1.0</Version>
+    <PackageProjectUrl>https://github.com/alex-davidson/FlexiGlob</PackageProjectUrl>
   </PropertyGroup>
 
   <Import Project="..\Common.props" />
