@@ -22,12 +22,14 @@ namespace FlexiGlob.Parsing
             // * Caller checked for repeated separators already.
             // * First token is not a separator.
             var segmentTokens = new List<Token>(10);
+            var lastSegmentWasWildcardMulti = false;
+            var segments = new List<Segment>();
             foreach (var token in tokens)
             {
                 if (token.Type == TokenType.Separator)
                 {
                     Debug.Assert(segmentTokens.Count > 0);
-                    yield return CreateSegment(context, segmentTokens);
+                    PushSegment(CreateSegment(context, segmentTokens));
                     segmentTokens.Clear();
                 }
                 else
@@ -35,7 +37,22 @@ namespace FlexiGlob.Parsing
                     segmentTokens.Add(token);
                 }
             }
-            if (segmentTokens.Count > 0) yield return CreateSegment(context, segmentTokens);
+            if (segmentTokens.Count > 0) PushSegment(CreateSegment(context, segmentTokens));
+            return segments;
+
+            void PushSegment(Segment segment)
+            {
+                if (segment is WildcardMultiSegment)
+                {
+                    if (!lastSegmentWasWildcardMulti) segments.Add(segment);
+                    lastSegmentWasWildcardMulti = true;
+                }
+                else
+                {
+                    segments.Add(segment);
+                    lastSegmentWasWildcardMulti = false;
+                }
+            }
         }
 
         private Segment CreateSegment(ParseContext context, List<Token> tokens)

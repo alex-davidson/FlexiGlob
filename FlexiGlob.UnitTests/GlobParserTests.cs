@@ -186,6 +186,23 @@ namespace FlexiGlob.UnitTests
             Assert.That(() => parser.Parse("./logs-{missing}/{MM}{dd}/*.log"), Throws.InstanceOf<GlobFormatException>());
         }
 
+        [Test]
+        public void CoalescesAdjacentWildcardMultiSegments()
+        {
+            var glob = new GlobParser().Parse("a/**/**/**/b/**/c");
+
+            Assert.That(glob.Segments,
+                Is.EqualTo(new Segment[]
+                {
+                    new FixedSegment("a"),
+                    new WildcardMultiSegment(),
+                    new FixedSegment("b"),
+                    new WildcardMultiSegment(),
+                    new FixedSegment("c"),
+                })
+                .Using(new SegmentEqualityComparer()));
+        }
+
         public class Case
         {
             public string? Pattern { get; set; }
