@@ -17,7 +17,7 @@ namespace FlexiGlob
         public IGlobMatch Start(Segment[] segments, bool caseSensitive)
         {
             var evaluator = new MatchEvaluator(segments, caseSensitive);
-            if (!segments.Any()) return NoMatch.Instance;
+            if (!segments.Any()) return RecursiveMatchContext.NoMatch;
             return new RecursiveMatchContext(evaluator, new[] { MatchState.Start });
         }
     }

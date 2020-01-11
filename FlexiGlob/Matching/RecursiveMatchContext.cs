@@ -6,8 +6,18 @@ namespace FlexiGlob.Matching
 {
     internal class RecursiveMatchContext : IGlobMatch
     {
-        private readonly MatchEvaluator evaluator;
+        public static readonly IGlobMatch NoMatch = new RecursiveMatchContext();
+
+        private readonly MatchEvaluator? evaluator;
         private readonly MatchState[] matchStates;
+
+        private RecursiveMatchContext()
+        {
+            IsMatch = false;
+            CanContinue = false;
+            matchStates = new MatchState[0];
+            evaluator = null;
+        }
 
         public RecursiveMatchContext(MatchEvaluator evaluator, MatchState[] matchStates)
         {
@@ -22,14 +32,14 @@ namespace FlexiGlob.Matching
 
         public IGlobMatch MatchChild(string segment)
         {
-            if (!matchStates.Any()) return NoMatch.Instance;
+            if (!matchStates.Any()) return NoMatch;
 
-            var newMatchStates = evaluator.Evaluate(matchStates, segment).ToArray();
-            if (!newMatchStates.Any()) return NoMatch.Instance;
+            var newMatchStates = evaluator!.Evaluate(matchStates, segment).ToArray();
+            if (!newMatchStates.Any()) return NoMatch;
             return new RecursiveMatchContext(evaluator, newMatchStates);
         }
 
-        public string GetPrefixFilter() => evaluator.GetChildPrefix(matchStates);
+        public string GetPrefixFilter() => evaluator?.GetChildPrefix(matchStates) ?? "";
 
         public IEnumerable<MatchedVariable> GetVariables()
         {
