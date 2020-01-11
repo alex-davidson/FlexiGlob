@@ -19,7 +19,7 @@ namespace FlexiGlob.Matching
             var nextMatchStates = new List<MatchState>();
             foreach (var state in matchStates)
             {
-                if (!state.CanContinue) continue;
+                if (!state.Flags.HasFlag(MatchFlags.CanContinue)) continue;
 
                 EvaluateMatches(nextMatchStates, pathSegment, state, state.NextSegmentIndex);
             }
@@ -35,8 +35,10 @@ namespace FlexiGlob.Matching
             var isComplete = segments.Length == index + 1;
             if (segment is WildcardMultiSegment)
             {
+                var flags = MatchFlags.CanContinue;
+                if (isComplete) flags |= MatchFlags.IsMatch | MatchFlags.MatchesAllChildren;
                 // Match this segment without consuming it:
-                nextMatchStates.Add(new MatchState(state, index, isComplete, true, isComplete, MatchedVariable.None));
+                nextMatchStates.Add(new MatchState(state, index, flags, MatchedVariable.None));
                 // Maybe skip this segment and match the next one instead:
                 EvaluateMatches(nextMatchStates, pathSegment, state, index + 1);
             }
@@ -45,7 +47,8 @@ namespace FlexiGlob.Matching
                 var match = segment.Match(pathSegment, caseSensitive);
                 if (!match.Success) return;
 
-                nextMatchStates.Add(new MatchState(state, index + 1, isComplete, !isComplete, false, match.Variables));
+                var flags = isComplete ? MatchFlags.IsMatch : MatchFlags.CanContinue;
+                nextMatchStates.Add(new MatchState(state, index + 1, flags, match.Variables));
             }
         }
 
@@ -54,7 +57,7 @@ namespace FlexiGlob.Matching
             var prefixes = new List<string>();
             foreach (var state in matchStates)
             {
-                if (!state.CanContinue) continue;
+                if (!state.Flags.HasFlag(MatchFlags.CanContinue)) continue;
 
                 Debug.Assert(state.NextSegmentIndex < segments.Length);
                 var segment = segments[state.NextSegmentIndex];

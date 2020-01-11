@@ -14,8 +14,7 @@ namespace FlexiGlob
 
         private GlobMatch()
         {
-            IsMatch = false;
-            CanContinue = false;
+            flags = MatchFlags.None;
             matchStates = new MatchState[0];
             evaluator = null;
         }
@@ -24,23 +23,25 @@ namespace FlexiGlob
         {
             this.evaluator = evaluator;
             this.matchStates = matchStates;
-            IsMatch = matchStates.Any(m => m.IsComplete);
-            CanContinue = matchStates.Any(m => m.CanContinue);
-            MatchesAllChildren = matchStates.Any(m => m.MatchesAllChildren);
+            foreach (var state in matchStates)
+            {
+                flags |= state.Flags;
+            }
         }
 
+        private readonly MatchFlags flags;
         /// <summary>
         /// True if this represents a complete match of the entire glob.
         /// </summary>
-        public bool IsMatch { get; }
+        public bool IsMatch => flags.HasFlag(MatchFlags.IsMatch);
         /// <summary>
         /// True if this could potentially match a child of the current location.
         /// </summary>
-        public bool CanContinue { get; }
+        public bool CanContinue => flags.HasFlag(MatchFlags.CanContinue);
         /// <summary>
         /// True if every child, recursively, will match as well.
         /// </summary>
-        public bool MatchesAllChildren { get; }
+        public bool MatchesAllChildren => flags.HasFlag(MatchFlags.MatchesAllChildren);
 
         /// <summary>
         /// Attempt to match the specified child of our current location.
@@ -65,7 +66,7 @@ namespace FlexiGlob
         public IEnumerable<MatchedVariable> GetVariables()
         {
             if (!IsMatch) throw new InvalidOperationException("Match is not complete.");
-            return matchStates.First(m => m.IsComplete).GetVariables();
+            return matchStates.First(m => m.Flags.HasFlag(MatchFlags.IsMatch)).GetVariables();
         }
     }
 }
