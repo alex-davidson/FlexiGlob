@@ -44,14 +44,14 @@ namespace FlexiGlob
 
         public struct Match<T>
         {
-            public Match(T item, IGlobMatch details)
+            public Match(T item, GlobMatch details)
             {
                 Item = item;
                 Details = details;
             }
 
             public T Item { get; }
-            public IGlobMatch Details { get; }
+            public GlobMatch Details { get; }
         }
     }
 }

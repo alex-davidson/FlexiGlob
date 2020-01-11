@@ -108,14 +108,14 @@ namespace FlexiGlob
 
         public struct Matched
         {
-            public Matched(Glob glob, IGlobMatch details)
+            public Matched(Glob glob, GlobMatch details)
             {
                 Glob = glob;
                 Details = details;
             }
 
             public Glob Glob { get; set; }
-            public IGlobMatch Details { get; }
+            public GlobMatch Details { get; }
         }
     }
 }
