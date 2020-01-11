@@ -27,14 +27,14 @@ namespace FlexiGlob
 
             var startIncludes = includes.Select(i => new Matched(i, factory.Start(i.Segments))).ToArray();
             var startExcludes = excludes.Select(e => new Matched(e, factory.Start(e.Segments))).ToArray();
-            var queue = new Queue<State<T>>();
-            queue.Enqueue(new State<T>(hierarchy.Root, startIncludes, startExcludes));
+            var worklist = new Worklist<State<T>>();
+            worklist.Add(new State<T>(hierarchy.Root, startIncludes, startExcludes));
 
             var newExcludes = new List<Matched>();
             var newIncludes = new List<Matched>();
             var matches = new List<Matched>();
 
-            while (queue.TryDequeue(out var pair))
+            while (worklist.TryTake(out var pair))
             {
                 foreach (var child in hierarchy.GetChildrenMatchingPrefix(pair.Item, GetCommonPrefix(pair.Include)))
                 {
@@ -75,7 +75,7 @@ namespace FlexiGlob
                     }
                     if (newIncludes.Any())
                     {
-                        queue.Enqueue(new State<T>(child, newIncludes.ToArray(), newExcludes.ToArray()));
+                        worklist.Add(new State<T>(child, newIncludes.ToArray(), newExcludes.ToArray()));
                     }
                 }
             }

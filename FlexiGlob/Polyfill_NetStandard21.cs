@@ -80,15 +80,6 @@ namespace FlexiGlob
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static bool TryDequeue<T>(this Queue<T> queue, out T item)
-        {
-            item = default!;
-            if (queue.Count == 0) return false;
-            item = queue.Dequeue();
-            return true;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static string Range(this string value, int start, int end) => value.Substring(start, end - start);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static string RangeFrom(this string value, int start) => value.Substring(start);
