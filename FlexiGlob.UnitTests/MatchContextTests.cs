@@ -156,6 +156,6 @@ namespace FlexiGlob.UnitTests
             Assert.That(ApplyToHierarchy(start, "a", "d", "b", "c").IsMatch, Is.True);
         }
 
-        private IGlobMatch ApplyToHierarchy(IGlobMatch child, params string[] pathSegments) => pathSegments.Aggregate(child, (m, p) => m.MatchChild(p));
+        private GlobMatch ApplyToHierarchy(GlobMatch child, params string[] pathSegments) => pathSegments.Aggregate(child, (m, p) => m.MatchChild(p));
     }
 }

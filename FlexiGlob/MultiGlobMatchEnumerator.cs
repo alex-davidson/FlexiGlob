@@ -27,20 +27,21 @@ namespace FlexiGlob
 
             var startIncludes = includes.Select(i => new Matched(i, factory.Start(i.Segments))).ToArray();
             var startExcludes = excludes.Select(e => new Matched(e, factory.Start(e.Segments))).ToArray();
-            var queue = new Queue<State<T>>();
-            queue.Enqueue(new State<T>(hierarchy.Root, startIncludes, startExcludes));
+            var worklist = new Worklist<State<T>>();
+            worklist.Add(new State<T>(hierarchy.Root, startIncludes, startExcludes));
 
             var newExcludes = new List<Matched>();
             var newIncludes = new List<Matched>();
             var matches = new List<Matched>();
 
-            while (queue.TryDequeue(out var pair))
+            while (worklist.TryTake(out var pair))
             {
                 foreach (var child in hierarchy.GetChildrenMatchingPrefix(pair.Item, GetCommonPrefix(pair.Include)))
                 {
                     var name = hierarchy.GetName(child);
                     var isContainer = hierarchy.IsContainer(child);
                     var isExcluded = false;
+                    var isEntireSubtreeExcluded = false;
                     newExcludes.Clear();
                     newIncludes.Clear();
                     matches.Clear();
@@ -48,11 +49,17 @@ namespace FlexiGlob
                     {
                         var newState = exclude.Details.MatchChild(name);
                         if (newState.IsMatch) isExcluded = true;
+                        if (newState.MatchesAllChildren)
+                        {
+                            isEntireSubtreeExcluded = true;
+                            break;
+                        }
                         if (newState.CanContinue && isContainer)
                         {
                             newExcludes.Add(new Matched(exclude.Glob, newState));
                         }
                     }
+                    if (isEntireSubtreeExcluded) continue;  // Early exit: a recursive wildcard excludes this entire subtree.
                     foreach (var include in pair.Include)
                     {
                         var newState = include.Details.MatchChild(name);
@@ -68,7 +75,7 @@ namespace FlexiGlob
                     }
                     if (newIncludes.Any())
                     {
-                        queue.Enqueue(new State<T>(child, newIncludes.ToArray(), newExcludes.ToArray()));
+                        worklist.Add(new State<T>(child, newIncludes.ToArray(), newExcludes.ToArray()));
                     }
                 }
             }
@@ -108,14 +115,14 @@ namespace FlexiGlob
 
         public struct Matched
         {
-            public Matched(Glob glob, IGlobMatch details)
+            public Matched(Glob glob, GlobMatch details)
             {
                 Glob = glob;
                 Details = details;
             }
 
             public Glob Glob { get; set; }
-            public IGlobMatch Details { get; }
+            public GlobMatch Details { get; }
         }
     }
 }

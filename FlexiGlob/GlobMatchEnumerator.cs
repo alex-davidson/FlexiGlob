@@ -25,10 +25,10 @@ namespace FlexiGlob
         public IEnumerable<Match<T>> EnumerateMatches<T>(IGlobMatchableHierarchy<T> hierarchy)
         {
             var start = new GlobMatchFactory(hierarchy.CaseSensitive).Start(segments);
-            var queue = new Queue<Match<T>>();
-            queue.Enqueue(new Match<T>(hierarchy.Root, start));
+            var worklist = new Worklist<Match<T>>();
+            worklist.Add(new Match<T>(hierarchy.Root, start));
 
-            while (queue.TryDequeue(out var pair))
+            while (worklist.TryTake(out var pair))
             {
                 foreach (var child in hierarchy.GetChildrenMatchingPrefix(pair.Item, pair.Details.GetPrefixFilter()))
                 {
@@ -36,7 +36,7 @@ namespace FlexiGlob
                     if (newState.IsMatch) yield return new Match<T>(child, newState);
                     if (newState.CanContinue && hierarchy.IsContainer(child))
                     {
-                        queue.Enqueue(new Match<T>(child, newState));
+                        worklist.Add(new Match<T>(child, newState));
                     }
                 }
             }
@@ -44,14 +44,14 @@ namespace FlexiGlob
 
         public struct Match<T>
         {
-            public Match(T item, IGlobMatch details)
+            public Match(T item, GlobMatch details)
             {
                 Item = item;
                 Details = details;
             }
 
             public T Item { get; }
-            public IGlobMatch Details { get; }
+            public GlobMatch Details { get; }
         }
     }
 }

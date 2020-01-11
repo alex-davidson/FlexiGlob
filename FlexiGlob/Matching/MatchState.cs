@@ -12,23 +12,20 @@ namespace FlexiGlob.Matching
         private MatchState()
         {
             NextSegmentIndex = 0;
-            IsComplete = false;
-            CanContinue = true;
+            Flags = MatchFlags.CanContinue;
             variables = MatchedVariable.None;
         }
 
-        public MatchState(MatchState parent, int nextSegmentIndex, bool isComplete, bool canContinue, MatchedVariable[] variables)
+        public MatchState(MatchState parent, int nextSegmentIndex, MatchFlags flags, MatchedVariable[] variables)
         {
             NextSegmentIndex = nextSegmentIndex;
-            IsComplete = isComplete;
-            CanContinue = canContinue;
+            Flags = flags;
             this.parent = parent;
             this.variables = variables;
         }
 
         public int NextSegmentIndex { get; }
-        public bool IsComplete { get; }
-        public bool CanContinue { get; }
+        public MatchFlags Flags { get; }
 
         public IEnumerable<MatchedVariable> GetVariables()
         {
