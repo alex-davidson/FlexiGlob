@@ -18,20 +18,18 @@ namespace FlexiGlob
         public IEnumerable<Match<T>> EnumerateMatches<T>(IGlobMatchableHierarchy<T> hierarchy)
         {
             var start = new GlobMatchFactory(hierarchy.CaseSensitive).Start(segments);
-            var queue = new Queue<(T, IGlobMatch)>();
-            queue.Enqueue((hierarchy.Root, start));
+            var queue = new Queue<Match<T>>();
+            queue.Enqueue(new Match<T>(hierarchy.Root, start));
 
             while (queue.TryDequeue(out var pair))
             {
-                var (item, state) = pair;
-
-                foreach (var child in hierarchy.GetChildrenMatchingPrefix(item, state.GetPrefixFilter()))
+                foreach (var child in hierarchy.GetChildrenMatchingPrefix(pair.Item, pair.Details.GetPrefixFilter()))
                 {
-                    var newState = state.MatchChild(hierarchy.GetName(child));
+                    var newState = pair.Details.MatchChild(hierarchy.GetName(child));
                     if (newState.IsMatch) yield return new Match<T>(child, newState);
                     if (newState.CanContinue && hierarchy.IsContainer(child))
                     {
-                        queue.Enqueue((child, newState));
+                        queue.Enqueue(new Match<T>(child, newState));
                     }
                 }
             }

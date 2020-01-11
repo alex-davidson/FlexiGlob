@@ -11,6 +11,8 @@ build:
 
 test_script:
   - cmd: dotnet test FlexiGlob.UnitTests\bin\%CONFIGURATION%\netcoreapp3.0\FlexiGlob.UnitTests.dll
+  - cmd: nunit3-console FlexiGlob.UnitTests\bin\%CONFIGURATION%\net46\FlexiGlob.UnitTests.dll --result=FlexiGlob.UnitTests.native.xml;format=AppVeyor
+  - ps: (New-Object 'System.Net.WebClient').UploadFile("https://ci.appveyor.com/api/testresults/xunit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path .\FlexiGlob.UnitTests.native.xml))
 
 artifacts:
   - path: FlexiGlob\bin\$(configuration)\FlexiGlob.*.nupkg

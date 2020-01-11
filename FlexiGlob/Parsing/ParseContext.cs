@@ -16,7 +16,7 @@ namespace FlexiGlob.Parsing
         public GlobFormatException CreateError(string message, Token token) => CreateError(message, token.Start);
         public GlobFormatException CreateError(string message, int start) => throw new GlobFormatException(message, Pattern, start);
 
-        public string GetOriginalText(Token token) => Pattern[token.Start..token.End];
-        public string GetOriginalText(IList<Token> tokens) => Pattern[tokens.First().Start..tokens.Last().End];
+        public string GetOriginalText(Token token) => Pattern.Range(token.Start, token.End);
+        public string GetOriginalText(IList<Token> tokens) => Pattern.Range(tokens.First().Start, tokens.Last().End);
     }
 }

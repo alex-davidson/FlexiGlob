@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace FlexiGlob
 {
@@ -44,7 +45,7 @@ namespace FlexiGlob
                     }
                 }
             }
-            return prefix[..length];
+            return prefix.RangeTo(length);
         }
     }
 }

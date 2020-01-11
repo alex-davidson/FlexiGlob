@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 using FlexiGlob.Matching;
 
@@ -28,8 +29,13 @@ namespace FlexiGlob
                         // Only group 0 (the entire regex) was matched.
                         return SegmentMatchResult.Match;
                     }
-                    var variables = match.Groups.Where(g => regex.GroupNumberFromName(g.Name) != 0).Select(g => new MatchedVariable(g.Name, g.Value)).ToArray();
-                    return SegmentMatchResult.MatchWithVariables(variables);
+                    var variables = new List<MatchedVariable>(match.Groups.Count - 1);
+                    foreach (var name in regex.GetGroupNames())
+                    {
+                        if (regex.GroupNumberFromName(name) == 0) continue;
+                        variables.Add(new MatchedVariable(name, match.Groups[name].Value));
+                    }
+                    return SegmentMatchResult.MatchWithVariables(variables.ToArray());
                 }
             }
             else

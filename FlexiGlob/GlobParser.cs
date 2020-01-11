@@ -127,14 +127,14 @@ namespace FlexiGlob
             var endOfMachine = context.Pattern.IndexOf(GlobPathTokeniser.SegmentSeparator, 2);
             if (endOfMachine < 0) throw context.CreateError("UNC path must specify a share.");
 
-            var machine = context.Pattern[2..endOfMachine];
+            var machine = context.Pattern.Range(2, endOfMachine);
             ValidateMachineName(context, machine, 2);
 
             var startOfShare = endOfMachine + 1;
             var endOfShare = context.Pattern.IndexOf(GlobPathTokeniser.SegmentSeparator, endOfMachine + 1);
             if (endOfShare < 0)
             {
-                var share = context.Pattern[startOfShare..].Trim();
+                var share = context.Pattern.RangeFrom(startOfShare).Trim();
                 ValidateShareName(context, share, startOfShare);
                 // No remaining path. No possibility of repeated separators.
                 offset = context.Pattern.Length;
@@ -142,11 +142,11 @@ namespace FlexiGlob
             }
             else
             {
-                var share = context.Pattern[startOfShare..endOfShare].Trim();
+                var share = context.Pattern.Range(startOfShare, endOfShare).Trim();
                 ValidateShareName(context, share, startOfShare);
                 AssertNoRepeatedSeparators(context, endOfShare);
                 offset = endOfShare + 1;
-                return new UNCRootSegment(context.Pattern[..endOfShare], machine, share);
+                return new UNCRootSegment(context.Pattern.RangeTo(endOfShare), machine, share);
             }
         }
 

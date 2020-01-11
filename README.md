@@ -2,6 +2,9 @@
 
 *Flexible globbing library for .NET*
 
+* FlexiGlob is released under the [Unlicense](LICENSE). Do whatever you like with it.
+* [Changelog](CHANGELOG.md)
+
 ## Why?
 
 There are a fair few .NET globbing libraries out there, but they are usually optimised for speed at the expense of tweakability.
@@ -17,10 +20,8 @@ Performance was not a primary goal, but some effort has been made to avoid exces
 
 ## Dependencies
 
-* Built upon .NET Standard 2.1, so it should be compatible with .NET Core 3 and any later versions of the same.
+* Targets .NET Standard 1.3 and 2.1, therefore it should work with .NET Framework 4.6 and later, and all versions of .NET Core.
 * No additional library dependencies.
-
-It would be convenient to be able to use this in .NET Framework projects too so I might reduce the .NET Standard version dependency at some point.
 
 ## Supported Glob Syntax
 
@@ -91,7 +92,3 @@ When a path like `logs/2020/01-10/service.log` is matched, the IGlobMatch object
 * `dd`: `10`
 
 These can then be read and handled by the consuming code.
-
-## License
-
-FlexiGlob is released under the [Unlicense](LICENSE). Do whatever you like with it.
