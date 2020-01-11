@@ -122,6 +122,47 @@ namespace FlexiGlob.UnitTests
         }
 
         [Test]
+        public void ContainerExclusionDoesNotApplyRecursively()
+        {
+            var hierarchy = new TestHierarchy(
+                new SimpleMatchable("root",
+                    new SimpleMatchable("dev",
+                        new SimpleMatchable("hda"),
+                        new SimpleMatchable("hda1"),
+                        new SimpleMatchable("hdb"),
+                        new SimpleMatchable("hdb1"),
+                        new SimpleMatchable("hdb2")),
+                    new SimpleMatchable("home",
+                        new SimpleMatchable("me",
+                            new SimpleMatchable("hdmi")),
+                        new SimpleMatchable("you")),
+                    new SimpleMatchable("var")));
+
+            var parser = new GlobParser();
+            var includes = new []
+            {
+                parser.Parse("**/h*")
+            };
+            var excludes = new []
+            {
+                parser.Parse("home")
+            };
+
+            var matches = new MultiGlobMatchEnumerator(includes, excludes).EnumerateMatches(hierarchy);
+
+            Assert.That(matches.Select(m => m.Item.Name).ToArray(),
+                Is.EquivalentTo(new []
+                {
+                    "hda",
+                    "hda1",
+                    "hdb",
+                    "hdb1",
+                    "hdb2",
+                    "hdmi"
+                }));
+        }
+
+        [Test]
         public void YieldsMatchDetailsPerIncludeGlob()
         {
             var hierarchy = new TestHierarchy(
