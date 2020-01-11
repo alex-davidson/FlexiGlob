@@ -35,9 +35,7 @@ namespace FlexiGlob.Matching
             var isComplete = segments.Length == index + 1;
             if (segment is WildcardMultiSegment)
             {
-                // Match just this segment:
-                nextMatchStates.Add(new MatchState(state, index + 1, isComplete, !isComplete, MatchedVariable.None));
-                // Try to match the next segment too:
+                // Match this segment without consuming it:
                 nextMatchStates.Add(new MatchState(state, index, isComplete, true, MatchedVariable.None));
                 // Maybe skip this segment and match the next one instead:
                 EvaluateMatches(nextMatchStates, pathSegment, state, index + 1);
