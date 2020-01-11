@@ -41,6 +41,7 @@ namespace FlexiGlob
                     var name = hierarchy.GetName(child);
                     var isContainer = hierarchy.IsContainer(child);
                     var isExcluded = false;
+                    var isEntireSubtreeExcluded = false;
                     newExcludes.Clear();
                     newIncludes.Clear();
                     matches.Clear();
@@ -48,11 +49,17 @@ namespace FlexiGlob
                     {
                         var newState = exclude.Details.MatchChild(name);
                         if (newState.IsMatch) isExcluded = true;
+                        if (newState.MatchesAllChildren)
+                        {
+                            isEntireSubtreeExcluded = true;
+                            break;
+                        }
                         if (newState.CanContinue && isContainer)
                         {
                             newExcludes.Add(new Matched(exclude.Glob, newState));
                         }
                     }
+                    if (isEntireSubtreeExcluded) continue;  // Early exit: a recursive wildcard excludes this entire subtree.
                     foreach (var include in pair.Include)
                     {
                         var newState = include.Details.MatchChild(name);

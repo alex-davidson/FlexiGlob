@@ -36,7 +36,7 @@ namespace FlexiGlob.Matching
             if (segment is WildcardMultiSegment)
             {
                 // Match this segment without consuming it:
-                nextMatchStates.Add(new MatchState(state, index, isComplete, true, MatchedVariable.None));
+                nextMatchStates.Add(new MatchState(state, index, isComplete, true, isComplete, MatchedVariable.None));
                 // Maybe skip this segment and match the next one instead:
                 EvaluateMatches(nextMatchStates, pathSegment, state, index + 1);
             }
@@ -45,7 +45,7 @@ namespace FlexiGlob.Matching
                 var match = segment.Match(pathSegment, caseSensitive);
                 if (!match.Success) return;
 
-                nextMatchStates.Add(new MatchState(state, index + 1, isComplete, !isComplete, match.Variables));
+                nextMatchStates.Add(new MatchState(state, index + 1, isComplete, !isComplete, false, match.Variables));
             }
         }
 

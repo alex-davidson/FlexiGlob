@@ -26,6 +26,7 @@ namespace FlexiGlob
             this.matchStates = matchStates;
             IsMatch = matchStates.Any(m => m.IsComplete);
             CanContinue = matchStates.Any(m => m.CanContinue);
+            MatchesAllChildren = matchStates.Any(m => m.MatchesAllChildren);
         }
 
         /// <summary>
@@ -36,6 +37,10 @@ namespace FlexiGlob
         /// True if this could potentially match a child of the current location.
         /// </summary>
         public bool CanContinue { get; }
+        /// <summary>
+        /// True if every child, recursively, will match as well.
+        /// </summary>
+        public bool MatchesAllChildren { get; }
 
         /// <summary>
         /// Attempt to match the specified child of our current location.

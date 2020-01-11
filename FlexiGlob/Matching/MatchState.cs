@@ -17,11 +17,12 @@ namespace FlexiGlob.Matching
             variables = MatchedVariable.None;
         }
 
-        public MatchState(MatchState parent, int nextSegmentIndex, bool isComplete, bool canContinue, MatchedVariable[] variables)
+        public MatchState(MatchState parent, int nextSegmentIndex, bool isComplete, bool canContinue, bool matchesAllChildren, MatchedVariable[] variables)
         {
             NextSegmentIndex = nextSegmentIndex;
             IsComplete = isComplete;
             CanContinue = canContinue;
+            MatchesAllChildren = matchesAllChildren;
             this.parent = parent;
             this.variables = variables;
         }
@@ -29,6 +30,7 @@ namespace FlexiGlob.Matching
         public int NextSegmentIndex { get; }
         public bool IsComplete { get; }
         public bool CanContinue { get; }
+        public bool MatchesAllChildren { get; }
 
         public IEnumerable<MatchedVariable> GetVariables()
         {
