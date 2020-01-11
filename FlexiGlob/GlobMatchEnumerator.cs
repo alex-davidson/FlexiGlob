@@ -2,6 +2,13 @@
 
 namespace FlexiGlob
 {
+    /// <summary>
+    /// Match a hierarchy against a glob.
+    /// </summary>
+    /// <remarks>
+    /// Note that the starting point is supplied by the hierarchy, not the glob. Only the path segments
+    /// of the glob are considered; the root is ignored.
+    /// </remarks>
     public class GlobMatchEnumerator
     {
         private readonly Segment[] segments;

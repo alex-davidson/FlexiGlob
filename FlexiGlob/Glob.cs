@@ -2,6 +2,8 @@
 {
     public class Glob
     {
+        public static readonly Glob[] None = new Glob[0];
+
         public RootSegment? Root { get; }
         public Segment[] Segments { get; }
 

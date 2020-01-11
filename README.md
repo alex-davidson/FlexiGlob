@@ -55,6 +55,8 @@ foreach (var match in new GlobMatchEnumerator(glob).EnumerateMatches(filesystem)
 }
 ```
 
+There is also a MultiGlobMatchEnumerator which evaluates multiple globs in parallel and can treat some as exclusions.
+
 ### Advanced
 
 The primary API of the library consists of:
