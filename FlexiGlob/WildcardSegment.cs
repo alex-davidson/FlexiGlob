@@ -56,6 +56,8 @@ namespace FlexiGlob
 
         public override string ToString() => $"{Token} (as /{Regex}/, using prefix {Prefix})";
 
+        public string[]? GetVariableNames() => (caseSensitiveImpl ?? caseInsensitiveImpl).Value.VariableNames;
+
         private struct Impl
         {
             public Impl(string regexString, bool caseSensitive)

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using FlexiGlob.Comparers;
 using NUnit.Framework;
 
 namespace FlexiGlob.UnitTests
@@ -6,6 +7,10 @@ namespace FlexiGlob.UnitTests
     [TestFixture]
     public class GlobParserTests
     {
+        private static readonly IEqualityComparer<Segment> segmentComparer = SegmentEqualityComparer.CaseSensitive;
+        private static readonly IEqualityComparer<RootSegment> rootSegmentComparer = new RootSegmentEqualityComparer();
+        private static readonly IEqualityComparer<Glob> globComparer = GlobEqualityComparer.CaseSensitive;
+
         public static Case[] Valid =
         {
             new Case
@@ -135,8 +140,9 @@ namespace FlexiGlob.UnitTests
         {
             var glob = new GlobParser().Parse(testCase.Pattern!);
 
-            Assert.That(glob.Root, Is.EqualTo(testCase.Root).Using(new RootSegmentEqualityComparer()));
-            Assert.That(glob.Segments, Is.EqualTo(testCase.Segments).Using(new SegmentEqualityComparer()));
+            Assert.That(glob.Root, Is.EqualTo(testCase.Root).Using(rootSegmentComparer));
+            Assert.That(glob.Segments, Is.EqualTo(testCase.Segments).Using(segmentComparer));
+            Assert.That(glob, Is.EqualTo(new Glob(testCase.Root, testCase.Segments.ToArray())).Using(globComparer));
         }
 
         [TestCaseSource(nameof(Invalid))]
@@ -160,15 +166,14 @@ namespace FlexiGlob.UnitTests
 
             var glob = parser.Parse("./logs-{yyyy}/{MM}{dd}/*.log");
 
-            Assert.That(glob.Root, Is.Null);
-            Assert.That(glob.Segments,
-                Is.EqualTo(new []
-                {
-                    new WildcardSegment("logs-{yyyy}", @"^logs-(?<yyyy>(\d{4}))$", "logs-"),
-                    new WildcardSegment("{MM}{dd}", @"^(?<MM>(\d{2}))(?<dd>(\d{2}))$", ""),
-                    new WildcardSegment("*.log", @"^.*\.log$", ""),
-                })
-                .Using(new SegmentEqualityComparer()));
+            var expected = new Glob(null,
+                new WildcardSegment("logs-{yyyy}", @"^logs-(?<yyyy>(\d{4}))$", "logs-"),
+                new WildcardSegment("{MM}{dd}", @"^(?<MM>(\d{2}))(?<dd>(\d{2}))$", ""),
+                new WildcardSegment("*.log", @"^.*\.log$", ""));
+
+            Assert.That(glob.Root, Is.EqualTo(expected.Root).Using(rootSegmentComparer));
+            Assert.That(glob.Segments, Is.EqualTo(expected.Segments).Using(segmentComparer));
+            Assert.That(glob, Is.EqualTo(expected).Using(globComparer));
         }
 
         [Test]
@@ -191,16 +196,16 @@ namespace FlexiGlob.UnitTests
         {
             var glob = new GlobParser().Parse("a/**/**/**/b/**/c");
 
-            Assert.That(glob.Segments,
-                Is.EqualTo(new Segment[]
-                {
-                    new FixedSegment("a"),
-                    new WildcardMultiSegment(),
-                    new FixedSegment("b"),
-                    new WildcardMultiSegment(),
-                    new FixedSegment("c"),
-                })
-                .Using(new SegmentEqualityComparer()));
+            var expected = new Glob(null,
+                new FixedSegment("a"),
+                new WildcardMultiSegment(),
+                new FixedSegment("b"),
+                new WildcardMultiSegment(),
+                new FixedSegment("c"));
+
+            Assert.That(glob.Root, Is.EqualTo(expected.Root).Using(rootSegmentComparer));
+            Assert.That(glob.Segments, Is.EqualTo(expected.Segments).Using(segmentComparer));
+            Assert.That(glob, Is.EqualTo(expected).Using(globComparer));
         }
 
         public class Case
@@ -210,45 +215,6 @@ namespace FlexiGlob.UnitTests
             public List<Segment> Segments { get; } = new List<Segment>();
 
             public override string ToString() => Pattern ?? "";
-        }
-
-        private class RootSegmentEqualityComparer : IEqualityComparer<RootSegment>
-        {
-            public bool Equals(RootSegment? x, RootSegment? y)
-            {
-                if (ReferenceEquals(x, y)) return true;
-                switch (x, y)
-                {
-                    case (UNCRootSegment a, UNCRootSegment b): return a.Machine == b.Machine && a.Share == b.Share;
-                    case (LocalRootSegment a, LocalRootSegment b): return a.Token == b.Token;
-                    default: return false;
-                }
-            }
-
-            public int GetHashCode(RootSegment obj)
-            {
-                return obj.Token.GetHashCode();
-            }
-        }
-
-        private class SegmentEqualityComparer : IEqualityComparer<Segment>
-        {
-            public bool Equals(Segment? x, Segment? y)
-            {
-                if (ReferenceEquals(x, y)) return true;
-                switch (x, y)
-                {
-                    case (FixedSegment a, FixedSegment b): return a.Token == b.Token;
-                    case (WildcardMultiSegment a, WildcardMultiSegment b): return true;
-                    case (WildcardSegment a, WildcardSegment b): return a.Regex == b.Regex && a.Prefix == b.Prefix;
-                    default: return false;
-                }
-            }
-
-            public int GetHashCode(Segment obj)
-            {
-                return obj.Token.GetHashCode();
-            }
         }
     }
 }

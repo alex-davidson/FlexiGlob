@@ -2,6 +2,7 @@
 
 ## Alpha versions
 
+* 0.5.0: Add equality comparers to the public API.
 * 0.4.0: More performance optimisations, and API changes in support of that.
 * 0.3.1: Performance optimisations.
 * 0.3.0: Adds MultiGlobMatchEnumerator, for applying multiple globs to a hierarchy.
