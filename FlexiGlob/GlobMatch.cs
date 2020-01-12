@@ -5,24 +5,18 @@ using FlexiGlob.Matching;
 
 namespace FlexiGlob
 {
-    public sealed class GlobMatch
+    public struct GlobMatch
     {
-        public static readonly GlobMatch NoMatch = new GlobMatch();
+        public static readonly GlobMatch NoMatch = default;
 
         private readonly MatchEvaluator? evaluator;
         private readonly MatchState[] matchStates;
 
-        private GlobMatch()
-        {
-            flags = MatchFlags.None;
-            matchStates = new MatchState[0];
-            evaluator = null;
-        }
-
         internal GlobMatch(MatchEvaluator evaluator, MatchState[] matchStates)
         {
-            this.evaluator = evaluator;
-            this.matchStates = matchStates;
+            this.evaluator = evaluator ?? throw new ArgumentNullException(nameof(evaluator));
+            this.matchStates = matchStates ?? throw new ArgumentNullException(nameof(matchStates));
+            flags = MatchFlags.None;
             foreach (var state in matchStates)
             {
                 flags |= state.Flags;
@@ -48,7 +42,8 @@ namespace FlexiGlob
         /// </summary>
         public GlobMatch MatchChild(string segment)
         {
-            if (!matchStates.Any()) return NoMatch;
+            if (matchStates == null) return NoMatch;
+            if (matchStates.Length == 0) return NoMatch;
 
             var newMatchStates = evaluator!.Evaluate(matchStates, segment).ToArray();
             if (!newMatchStates.Any()) return NoMatch;

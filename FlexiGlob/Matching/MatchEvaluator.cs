@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace FlexiGlob.Matching
@@ -18,6 +19,7 @@ namespace FlexiGlob.Matching
 
         public IEnumerable<MatchState> Evaluate(IEnumerable<MatchState> matchStates, string pathSegment)
         {
+            if (matchStates == null) throw new ArgumentNullException(nameof(matchStates));
             var nextMatchStates = new List<MatchState>();
             foreach (var state in matchStates)
             {
