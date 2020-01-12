@@ -15,65 +15,74 @@ namespace FlexiGlob
         {
             this.Regex = regex;
             Prefix = prefix;
-            caseSensitiveImpl = new Lazy<Impl>(() => new Impl(Regex, true));
-            caseInsensitiveImpl = new Lazy<Impl>(() => new Impl(Regex, false));
+            impl = new Impl(regex);
         }
 
         public override SegmentMatchResult Match(string candidate, bool caseSensitive)
         {
-            var impl = GetImpl(caseSensitive);
-            if (impl.VariableNames != null)
+            if (Prefix.Length > candidate.Length) return SegmentMatchResult.NoMatch;
+            if (!candidate.StartsWith(Prefix, caseSensitive ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase)) return SegmentMatchResult.NoMatch;
+            if (impl.VariableNames == null)
             {
-                var match = impl.Regex.Match(candidate);
-                if (match.Success)
-                {
-                    if (match.Groups.Count == 1)
-                    {
-                        // Only group 0 (the entire regex) was matched.
-                        return SegmentMatchResult.Match;
-                    }
-                    var variables = new List<MatchedVariable>(impl.VariableNames.Length);
-                    foreach (var name in impl.VariableNames)
-                    {
-                        var group = match.Groups[name];
-                        if (!group.Success) continue;
-                        variables.Add(new MatchedVariable(name, group.Value));
-                    }
-                    return SegmentMatchResult.MatchWithVariables(variables.ToArray());
-                }
+                return MatchOnly(candidate, caseSensitive);
             }
-            else
-            {
-                if (impl.Regex.IsMatch(candidate)) return SegmentMatchResult.Match;
-            }
+            return MatchWithCapture(candidate, caseSensitive);
+        }
+
+        private SegmentMatchResult MatchOnly(string candidate, bool caseSensitive)
+        {
+            var regex = caseSensitive ? impl.CaseSensitiveRegex : impl.CaseInsensitiveRegex;
+            if (regex.IsMatch(candidate)) return SegmentMatchResult.Match;
             return SegmentMatchResult.NoMatch;
         }
 
-        private readonly Lazy<Impl> caseSensitiveImpl;
-        private readonly Lazy<Impl> caseInsensitiveImpl;
+        private SegmentMatchResult MatchWithCapture(string candidate, bool caseSensitive)
+        {
+            var regex = caseSensitive ? impl.CaseSensitiveRegex : impl.CaseInsensitiveRegex;
+            var match = regex.Match(candidate);
+            if (!match.Success) return SegmentMatchResult.NoMatch;
+            if (match.Groups.Count == 1)
+            {
+                // Only group 0 (the entire regex) was matched.
+                return SegmentMatchResult.Match;
+            }
 
-        private Impl GetImpl(bool caseSensitive) => caseSensitive ? caseSensitiveImpl.Value : caseInsensitiveImpl.Value;
+            var variables = new List<MatchedVariable>(impl.VariableNames!.Length);
+            foreach (var name in impl.VariableNames)
+            {
+                var group = match.Groups[name];
+                if (!@group.Success) continue;
+                variables.Add(new MatchedVariable(name, @group.Value));
+            }
+
+            return SegmentMatchResult.MatchWithVariables(variables.ToArray());
+        }
+
+        private readonly Impl impl;
 
         public override string ToString() => $"{Token} (as /{Regex}/, using prefix {Prefix})";
 
-        public string[]? GetVariableNames() => (caseSensitiveImpl ?? caseInsensitiveImpl).Value.VariableNames;
+        internal string[]? GetVariableNamesDirect() => impl.VariableNames;
+        public IEnumerable<string> GetVariableNames() => impl.VariableNames.AsEnumerable() ?? Enumerable.Empty<string>();
 
         private struct Impl
         {
-            public Impl(string regexString, bool caseSensitive)
+            public Regex CaseSensitiveRegex { get; }
+            public Regex CaseInsensitiveRegex { get; }
+            public string[]? VariableNames { get; }
+
+            public Impl(string regexString)
             {
-                Regex = new Regex(regexString, RegexOptions.ExplicitCapture | (caseSensitive ? RegexOptions.None : RegexOptions.IgnoreCase));
+                CaseSensitiveRegex = new Regex(regexString, RegexOptions.ExplicitCapture);
+                CaseInsensitiveRegex = new Regex(regexString, RegexOptions.ExplicitCapture | RegexOptions.IgnoreCase);
                 var names = new List<string>();
-                foreach (var name in Regex.GetGroupNames())
+                foreach (var name in CaseSensitiveRegex.GetGroupNames())
                 {
-                    if (Regex.GroupNumberFromName(name) == 0) continue;
+                    if (CaseSensitiveRegex.GroupNumberFromName(name) == 0) continue;
                     names.Add(name);
                 }
                 VariableNames = names.Any() ? names.ToArray() : null;
             }
-
-            public string[]? VariableNames { get; }
-            public Regex Regex { get; }
         }
     }
 }
