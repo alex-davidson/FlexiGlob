@@ -16,7 +16,7 @@ Features I needed:
 
 Plus, writing a globbing library was a lot of fun.
 
-Performance was not a primary goal, but some effort has been made to avoid excessive use of regexen and enable future optimisations.
+Performance was not originally a primary goal, but some effort has been made to avoid excessive use of regexen and enable future optimisations, and once I start using the profiler I find it hard to stop.
 
 ## Dependencies
 
