@@ -1,12 +1,12 @@
 ﻿namespace FlexiGlob.Matching
 {
-    public class SegmentMatchResult
+    public struct SegmentMatchResult
     {
-        public static readonly SegmentMatchResult NoMatch = new SegmentMatchResult();
-        public static readonly SegmentMatchResult Match = new SegmentMatchResult() { Success = true };
-        public static SegmentMatchResult MatchWithVariables(MatchedVariable[] variables) => new SegmentMatchResult { Success = true, Variables =  variables };
+        public static readonly SegmentMatchResult NoMatch = new SegmentMatchResult { };
+        public static readonly SegmentMatchResult Match = new SegmentMatchResult() { Variables = MatchedVariable.None };
+        public static SegmentMatchResult MatchWithVariables(MatchedVariable[] variables) => new SegmentMatchResult { Variables = variables };
 
-        public bool Success { get; private set; }
-        public MatchedVariable[] Variables { get; private set; } = MatchedVariable.None;
+        public bool Success => Variables != null;
+        public MatchedVariable[] Variables { get; private set; }
     }
 }

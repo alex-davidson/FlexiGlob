@@ -2,7 +2,7 @@
 
 namespace FlexiGlob
 {
-    public class WildcardMultiSegment : Segment
+    public sealed class WildcardMultiSegment : Segment
     {
         public override string Prefix => "";
 

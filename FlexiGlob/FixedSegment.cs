@@ -3,7 +3,7 @@ using FlexiGlob.Matching;
 
 namespace FlexiGlob
 {
-    public class FixedSegment : Segment
+    public sealed class FixedSegment : Segment
     {
         public override string Prefix => Token;
 

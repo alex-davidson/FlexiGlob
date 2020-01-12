@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 
 namespace FlexiGlob.Matching
 {
@@ -18,5 +19,14 @@ namespace FlexiGlob.Matching
         /// Every child of the current location will match.
         /// </summary>
         MatchesAllChildren  = 0b0100,
+    }
+
+    internal static class MatchFlagsExtensions
+    {
+        /// <summary>
+        /// Eliminate costly boxing and method calls in the matching loop.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static bool HasMatchFlag(this MatchFlags flags, MatchFlags flag) => (flags & flag) != 0;
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace FlexiGlob.Matching
@@ -18,10 +19,11 @@ namespace FlexiGlob.Matching
 
         public IEnumerable<MatchState> Evaluate(IEnumerable<MatchState> matchStates, string pathSegment)
         {
+            if (matchStates == null) throw new ArgumentNullException(nameof(matchStates));
             var nextMatchStates = new List<MatchState>();
             foreach (var state in matchStates)
             {
-                if (!state.Flags.HasFlag(MatchFlags.CanContinue)) continue;
+                if (!state.Flags.HasMatchFlag(MatchFlags.CanContinue)) continue;
 
                 EvaluateMatches(nextMatchStates, pathSegment, state, state.NextSegmentIndex);
             }
@@ -59,7 +61,7 @@ namespace FlexiGlob.Matching
             var prefixes = new List<string>();
             foreach (var state in matchStates)
             {
-                if (!state.Flags.HasFlag(MatchFlags.CanContinue)) continue;
+                if (!state.Flags.HasMatchFlag(MatchFlags.CanContinue)) continue;
 
                 Debug.Assert(state.NextSegmentIndex < segments.Length);
                 var segment = segments[state.NextSegmentIndex];

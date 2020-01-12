@@ -49,7 +49,7 @@ namespace FlexiGlob.Comparers
             if (!stringComparer.Equals(a.Prefix, b.Prefix)) return false;
             if (!stringComparer.Equals(a.Regex, b.Regex)) return false;
             if (caseSensitive) return true; // Optimisation: variable names are part of the regex.
-            return VariableNamesEqual(a.GetVariableNames(), b.GetVariableNames());
+            return VariableNamesEqual(a.GetVariableNamesDirect(), b.GetVariableNamesDirect());
         }
 
         private static bool VariableNamesEqual(string[]? aVars, string[]? bVars)
