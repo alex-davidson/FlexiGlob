@@ -12,12 +12,12 @@ namespace FlexiGlob
             this.defaultCaseSensitive = defaultCaseSensitive;
         }
 
-        public GlobMatch Start(Segment[] segments) => Start(segments, defaultCaseSensitive);
+        public GlobMatch Start(Glob glob) => Start(glob, defaultCaseSensitive);
 
-        public GlobMatch Start(Segment[] segments, bool caseSensitive)
+        public GlobMatch Start(Glob glob, bool caseSensitive)
         {
-            var evaluator = new MatchEvaluator(segments, caseSensitive);
-            if (!segments.Any()) return GlobMatch.NoMatch;
+            var evaluator = new MatchEvaluator(glob, caseSensitive);
+            if (!glob.Segments.Any()) return GlobMatch.NoMatch;
             return new GlobMatch(evaluator, new[] { MatchState.Start });
         }
     }

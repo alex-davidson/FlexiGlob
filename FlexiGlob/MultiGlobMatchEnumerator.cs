@@ -12,75 +12,84 @@ namespace FlexiGlob
     /// </remarks>
     public class MultiGlobMatchEnumerator
     {
-        private readonly Glob[] includes;
-        private readonly Glob[] excludes;
+        private readonly GlobRule[] rules = new GlobRule[0];
 
-        public MultiGlobMatchEnumerator(Glob[] include, Glob[] exclude)
+        public MultiGlobMatchEnumerator()
         {
-            this.includes = include;
-            this.excludes = exclude;
+        }
+
+        private MultiGlobMatchEnumerator(IEnumerable<GlobRule> rules)
+        {
+            this.rules = rules.ToArray();
+        }
+
+        public MultiGlobMatchEnumerator Include(params Glob[] globs) =>
+            new MultiGlobMatchEnumerator(rules.Concat(globs.Select(g => new GlobRule { Glob = g, Exclude = false })));
+        public MultiGlobMatchEnumerator Exclude(params Glob[] globs) =>
+            new MultiGlobMatchEnumerator(rules.Concat(globs.Select(g => new GlobRule { Glob = g, Exclude = true })));
+
+        private struct GlobRule
+        {
+            public Glob Glob { get; set; }
+            public bool Exclude { get; set; }
         }
 
         public IEnumerable<MultiMatch<T>> EnumerateMatches<T>(IGlobMatchableHierarchy<T> hierarchy)
         {
             var factory = new GlobMatchFactory(hierarchy.CaseSensitive);
 
-            var startIncludes = includes.Select(i => new Matched(i, factory.Start(i.Segments))).ToArray();
-            var startExcludes = excludes.Select(e => new Matched(e, factory.Start(e.Segments))).ToArray();
+            var starts = rules.Select(r => new Rule(factory.Start(r.Glob), r.Exclude)).ToArray();
             var worklist = new Worklist<State<T>>();
-            worklist.Add(new State<T>(hierarchy.Root, startIncludes, startExcludes));
+            worklist.Add(new State<T>(hierarchy.Root, starts));
 
-            var newExcludes = new List<Matched>();
-            var newIncludes = new List<Matched>();
-            var matches = new List<Matched>();
+            var newStates = new List<Rule>();
+            var matches = new List<GlobMatch>();
 
             while (worklist.TryTake(out var pair))
             {
-                foreach (var child in hierarchy.GetChildrenMatchingPrefix(pair.Item, GetCommonPrefix(pair.Include)))
+                var includePrefix = GetCommonPrefix(pair.Current.Where(c => !c.Exclude));
+                foreach (var child in hierarchy.GetChildrenMatchingPrefix(pair.Item, includePrefix))
                 {
                     var name = hierarchy.GetName(child);
                     var isContainer = hierarchy.IsContainer(child);
                     var isExcluded = false;
-                    var isEntireSubtreeExcluded = false;
-                    newExcludes.Clear();
-                    newIncludes.Clear();
+
+                    newStates.Clear();
                     matches.Clear();
-                    foreach (var exclude in pair.Exclude)
+                    foreach (var state in pair.Current)
                     {
-                        var newState = exclude.Details.MatchChild(name);
-                        if (newState.IsMatch) isExcluded = true;
-                        if (newState.MatchesAllChildren)
+                        var newState = state.Details.MatchChild(name);
+                        if (state.Exclude)
                         {
-                            isEntireSubtreeExcluded = true;
-                            break;
+                            if (newState.IsMatch) isExcluded = true;
+                            if (newState.MatchesAllChildren)
+                            {
+                                // Early exit: entire subtree is ignored for subsequent rules.
+                                break;
+                            }
                         }
+                        else if (!isExcluded)
+                        {
+                            if (newState.IsMatch) matches.Add(newState);
+                        }
+
                         if (newState.CanContinue && isContainer)
                         {
-                            newExcludes.Add(new Matched(exclude.Glob, newState));
-                        }
-                    }
-                    if (isEntireSubtreeExcluded) continue;  // Early exit: a recursive wildcard excludes this entire subtree.
-                    foreach (var include in pair.Include)
-                    {
-                        var newState = include.Details.MatchChild(name);
-                        if (!isExcluded && newState.IsMatch) matches.Add(new Matched(include.Glob, newState));
-                        if (newState.CanContinue && isContainer)
-                        {
-                            newIncludes.Add(new Matched(include.Glob, newState));
+                            newStates.Add(new Rule(newState, state.Exclude));
                         }
                     }
                     if (matches.Any())
                     {
                         yield return new MultiMatch<T>(child, matches.ToArray());
                     }
-                    if (newIncludes.Any())
+                    if (newStates.Any())
                     {
-                        worklist.Add(new State<T>(child, newIncludes.ToArray(), newExcludes.ToArray()));
+                        worklist.Add(new State<T>(child, newStates.ToArray()));
                     }
                 }
             }
 
-            string GetCommonPrefix(Matched[] states)
+            string GetCommonPrefix(IEnumerable<Rule> states)
             {
                 var prefixes = states.Select(s => s.Details.GetPrefixFilter()).ToList();
                 return Util.LongestCommonPrefix(prefixes, hierarchy.CaseSensitive);
@@ -90,39 +99,37 @@ namespace FlexiGlob
         private struct State<T>
         {
             public T Item { get; }
-            public Matched[] Include { get; }
-            public Matched[] Exclude { get; }
+            public Rule[] Current { get; }
 
-            public State(T item, Matched[] include, Matched[] exclude)
+            public State(T item, Rule[] current)
             {
                 Item = item;
-                Include = include;
+                Current = current;
+            }
+        }
+
+        private struct Rule
+        {
+            public Rule(GlobMatch details, bool exclude)
+            {
+                Details = details;
                 Exclude = exclude;
             }
+
+            public GlobMatch Details { get; }
+            public bool Exclude { get; }
         }
 
         public struct MultiMatch<T>
         {
-            public MultiMatch(T item, Matched[] sources)
+            public MultiMatch(T item, GlobMatch[] details)
             {
                 Item = item;
-                Sources = sources;
-            }
-
-            public T Item { get; }
-            public Matched[] Sources { get; }
-        }
-
-        public struct Matched
-        {
-            public Matched(Glob glob, GlobMatch details)
-            {
-                Glob = glob;
                 Details = details;
             }
 
-            public Glob Glob { get; set; }
-            public GlobMatch Details { get; }
+            public T Item { get; }
+            public GlobMatch[] Details { get; }
         }
     }
 }

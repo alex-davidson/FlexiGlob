@@ -27,12 +27,10 @@ namespace FlexiGlob.UnitTests
                     new SimpleMatchable("var")));
 
             var parser = new GlobParser();
-            var includes = new []
-            {
-                parser.Parse("**/hd??")
-            };
 
-            var matches = new MultiGlobMatchEnumerator(includes, Glob.None).EnumerateMatches(hierarchy);
+            var matches = new MultiGlobMatchEnumerator()
+                .Include(parser.Parse("**/hd??"))
+                .EnumerateMatches(hierarchy);
 
             Assert.That(matches.Select(m => m.Item.Name).ToArray(),
                 Is.EquivalentTo(new []
@@ -62,13 +60,11 @@ namespace FlexiGlob.UnitTests
                     new SimpleMatchable("var")));
 
             var parser = new GlobParser();
-            var includes = new []
-            {
-                parser.Parse("**/hd[am]?"),
-                parser.Parse("home/**")
-            };
 
-            var matches = new MultiGlobMatchEnumerator(includes, Glob.None).EnumerateMatches(hierarchy);
+            var matches = new MultiGlobMatchEnumerator()
+                .Include(parser.Parse("**/hd[am]?"))
+                .Include(parser.Parse("home/**"))
+                .EnumerateMatches(hierarchy);
 
             Assert.That(matches.Select(m => m.Item.Name).ToArray(),
                 Is.EquivalentTo(new []
@@ -98,16 +94,11 @@ namespace FlexiGlob.UnitTests
                     new SimpleMatchable("var")));
 
             var parser = new GlobParser();
-            var includes = new []
-            {
-                parser.Parse("**/h*")
-            };
-            var excludes = new []
-            {
-                parser.Parse("home/*/**")
-            };
 
-            var matches = new MultiGlobMatchEnumerator(includes, excludes).EnumerateMatches(hierarchy);
+            var matches = new MultiGlobMatchEnumerator()
+                .Exclude(parser.Parse("home/*/**"))
+                .Include(parser.Parse("**/h*"))
+                .EnumerateMatches(hierarchy);
 
             Assert.That(matches.Select(m => m.Item.Name).ToArray(),
                 Is.EquivalentTo(new []
@@ -148,7 +139,10 @@ namespace FlexiGlob.UnitTests
                 parser.Parse("home")
             };
 
-            var matches = new MultiGlobMatchEnumerator(includes, excludes).EnumerateMatches(hierarchy);
+            var matches = new MultiGlobMatchEnumerator()
+                .Exclude(excludes)
+                .Include(includes)
+                .EnumerateMatches(hierarchy);
 
             Assert.That(matches.Select(m => m.Item.Name).ToArray(),
                 Is.EquivalentTo(new []
@@ -163,7 +157,7 @@ namespace FlexiGlob.UnitTests
         }
 
         [Test]
-        public void YieldsMatchDetailsPerIncludeGlob()
+        public void YieldsDetailsForEveryMatchingIncludeGlob()
         {
             var hierarchy = new TestHierarchy(
                 new SimpleMatchable("root",
@@ -186,7 +180,9 @@ namespace FlexiGlob.UnitTests
                 parser.Parse("home/**")
             };
 
-            var matches = new MultiGlobMatchEnumerator(includes, Glob.None).EnumerateMatches(hierarchy).ToArray();
+            var matches = new MultiGlobMatchEnumerator()
+                .Include(includes)
+                .EnumerateMatches(hierarchy).ToArray();
 
             Assume.That(matches.Select(m => m.Item.Name).ToArray(),
                 Is.EquivalentTo(new []
@@ -199,7 +195,70 @@ namespace FlexiGlob.UnitTests
 
             var hdmiMatch = matches.Single(m => m.Item.Name == "hdmi");
 
-            Assert.That(hdmiMatch.Sources.Select(s => s.Glob).ToArray(), Is.EquivalentTo(includes));
+            Assert.That(hdmiMatch.Details.Select(s => s.Glob).ToArray(), Is.EquivalentTo(includes));
+        }
+
+        [Test]
+        public void EarlierRulesTakePrecedence_IncludeBeforeExclude()
+        {
+            var hierarchy = new TestHierarchy(
+                new SimpleMatchable("root",
+                    new SimpleMatchable("dev",
+                        new SimpleMatchable("hda"),
+                        new SimpleMatchable("hda1"),
+                        new SimpleMatchable("hdb"),
+                        new SimpleMatchable("hdb1"),
+                        new SimpleMatchable("hdb2")),
+                    new SimpleMatchable("home",
+                        new SimpleMatchable("me",
+                            new SimpleMatchable("hdmi")),
+                        new SimpleMatchable("you")),
+                    new SimpleMatchable("var")));
+
+            var parser = new GlobParser();
+
+            var matches = new MultiGlobMatchEnumerator()
+                .Include(parser.Parse("**/hd[am]?"))
+                .Exclude(parser.Parse("dev/**"))
+                .EnumerateMatches(hierarchy).ToArray();
+
+            Assert.That(matches.Select(m => m.Item.Name).ToArray(),
+                Is.EquivalentTo(new []
+                {
+                    "hda1",
+                    "hdmi",
+                }));
+        }
+
+        [Test]
+        public void EarlierRulesTakePrecedence_ExcludeBeforeInclude()
+        {
+            var hierarchy = new TestHierarchy(
+                new SimpleMatchable("root",
+                    new SimpleMatchable("dev",
+                        new SimpleMatchable("hda"),
+                        new SimpleMatchable("hda1"),
+                        new SimpleMatchable("hdb"),
+                        new SimpleMatchable("hdb1"),
+                        new SimpleMatchable("hdb2")),
+                    new SimpleMatchable("home",
+                        new SimpleMatchable("me",
+                            new SimpleMatchable("hdmi")),
+                        new SimpleMatchable("you")),
+                    new SimpleMatchable("var")));
+
+            var parser = new GlobParser();
+
+            var matches = new MultiGlobMatchEnumerator()
+                .Exclude(parser.Parse("dev/**"))
+                .Include(parser.Parse("**/hd[am]?"))
+                .EnumerateMatches(hierarchy).ToArray();
+
+            Assert.That(matches.Select(m => m.Item.Name).ToArray(),
+                Is.EquivalentTo(new []
+                {
+                    "hdmi",
+                }));
         }
 
         private struct SimpleMatchable

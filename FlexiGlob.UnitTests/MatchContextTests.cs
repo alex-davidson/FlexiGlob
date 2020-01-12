@@ -10,7 +10,7 @@ namespace FlexiGlob.UnitTests
         public void FixedSegmentMatches()
         {
             var glob = new GlobParser().Parse("directory");
-            var start = new GlobMatchFactory(true).Start(glob.Segments);
+            var start = new GlobMatchFactory(true).Start(glob);
 
             var child = ApplyToHierarchy(start, "directory");
 
@@ -22,7 +22,7 @@ namespace FlexiGlob.UnitTests
         public void FixedSegmentMatchesOnlyOnce()
         {
             var glob = new GlobParser().Parse("directory");
-            var start = new GlobMatchFactory(true).Start(glob.Segments);
+            var start = new GlobMatchFactory(true).Start(glob);
 
             var child = ApplyToHierarchy(start, "directory", "directory");
 
@@ -34,7 +34,7 @@ namespace FlexiGlob.UnitTests
         public void FixedSegmentYieldsPrefix()
         {
             var glob = new GlobParser().Parse("directory");
-            var start = new GlobMatchFactory(true).Start(glob.Segments);
+            var start = new GlobMatchFactory(true).Start(glob);
 
             var prefix = start.GetPrefixFilter();
 
@@ -45,7 +45,7 @@ namespace FlexiGlob.UnitTests
         public void WildcardSegmentMatches()
         {
             var glob = new GlobParser().Parse("dir*ory");
-            var start = new GlobMatchFactory(true).Start(glob.Segments);
+            var start = new GlobMatchFactory(true).Start(glob);
 
             var child = ApplyToHierarchy(start, "directory");
 
@@ -57,7 +57,7 @@ namespace FlexiGlob.UnitTests
         public void WildcardSegmentMatchesOnlyOnce()
         {
             var glob = new GlobParser().Parse("dir*ory");
-            var start = new GlobMatchFactory(true).Start(glob.Segments);
+            var start = new GlobMatchFactory(true).Start(glob);
 
             var child = ApplyToHierarchy(start, "directory", "directory");
 
@@ -69,7 +69,7 @@ namespace FlexiGlob.UnitTests
         public void WildcardSegmentYieldsPrefix()
         {
             var glob = new GlobParser().Parse("dir*ory");
-            var start = new GlobMatchFactory(true).Start(glob.Segments);
+            var start = new GlobMatchFactory(true).Start(glob);
 
             var prefix = start.GetPrefixFilter();
 
@@ -87,7 +87,7 @@ namespace FlexiGlob.UnitTests
                 }
             };
             var glob = parser.Parse("directory{yyyy}");
-            var start = new GlobMatchFactory(true).Start(glob.Segments);
+            var start = new GlobMatchFactory(true).Start(glob);
 
             var child = ApplyToHierarchy(start, "directory2020");
 
@@ -100,7 +100,7 @@ namespace FlexiGlob.UnitTests
         public void WildcardMultiSegmentMatches()
         {
             var glob = new GlobParser().Parse("**");
-            var start = new GlobMatchFactory(true).Start(glob.Segments);
+            var start = new GlobMatchFactory(true).Start(glob);
 
             var child = ApplyToHierarchy(start, "directory");
 
@@ -112,7 +112,7 @@ namespace FlexiGlob.UnitTests
         public void WildcardMultiSegmentMatchesAnyDepth()
         {
             var glob = new GlobParser().Parse("**");
-            var start = new GlobMatchFactory(true).Start(glob.Segments);
+            var start = new GlobMatchFactory(true).Start(glob);
 
             var child = ApplyToHierarchy(start, "a", "b", "c");
 
@@ -124,7 +124,7 @@ namespace FlexiGlob.UnitTests
         public void WildcardMultiSegmentDoesNotYieldPrefix()
         {
             var glob = new GlobParser().Parse("**");
-            var start = new GlobMatchFactory(true).Start(glob.Segments);
+            var start = new GlobMatchFactory(true).Start(glob);
 
             var prefix = start.GetPrefixFilter();
 
@@ -135,7 +135,7 @@ namespace FlexiGlob.UnitTests
         public void WildcardMultiSegmentCanMatchNoSegments()
         {
             var glob = new GlobParser().Parse("a/**/b");
-            var start = new GlobMatchFactory(true).Start(glob.Segments);
+            var start = new GlobMatchFactory(true).Start(glob);
 
             var child = ApplyToHierarchy(start, "a", "b");
 
@@ -147,7 +147,7 @@ namespace FlexiGlob.UnitTests
         public void WildcardMultiSegmentCanMatchMultipleDepths()
         {
             var glob = new GlobParser().Parse("a/**/b/**/c");
-            var start = new GlobMatchFactory(true).Start(glob.Segments);
+            var start = new GlobMatchFactory(true).Start(glob);
 
             Assert.That(ApplyToHierarchy(start, "a", "b", "c").IsMatch, Is.True);
             Assert.That(ApplyToHierarchy(start, "a", "b", "c", "d").IsMatch, Is.False);

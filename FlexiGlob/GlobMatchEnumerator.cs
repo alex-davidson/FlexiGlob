@@ -11,20 +11,16 @@ namespace FlexiGlob
     /// </remarks>
     public class GlobMatchEnumerator
     {
-        private readonly Segment[] segments;
+        private readonly Glob glob;
 
-        public GlobMatchEnumerator(Glob glob) : this(glob.Segments)
+        public GlobMatchEnumerator(Glob glob)
         {
-        }
-
-        public GlobMatchEnumerator(Segment[] segments)
-        {
-            this.segments = segments;
+            this.glob = glob;
         }
 
         public IEnumerable<Match<T>> EnumerateMatches<T>(IGlobMatchableHierarchy<T> hierarchy)
         {
-            var start = new GlobMatchFactory(hierarchy.CaseSensitive).Start(segments);
+            var start = new GlobMatchFactory(hierarchy.CaseSensitive).Start(glob);
             var worklist = new Worklist<Match<T>>();
             worklist.Add(new Match<T>(hierarchy.Root, start));
 
