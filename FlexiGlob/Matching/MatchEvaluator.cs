@@ -5,12 +5,14 @@ namespace FlexiGlob.Matching
 {
     internal class MatchEvaluator
     {
+        public Glob Glob { get; }
         private readonly Segment[] segments;
         private readonly bool caseSensitive;
 
-        public MatchEvaluator(Segment[] segments, bool caseSensitive)
+        public MatchEvaluator(Glob glob, bool caseSensitive)
         {
-            this.segments = segments;
+            Glob = glob;
+            this.segments = glob.Segments;
             this.caseSensitive = caseSensitive;
         }
 

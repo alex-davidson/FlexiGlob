@@ -61,6 +61,11 @@ namespace FlexiGlob
         public string GetPrefixFilter() => evaluator?.GetChildPrefix(matchStates) ?? "";
 
         /// <summary>
+        /// The glob to which this match relates.
+        /// </summary>
+        public Glob Glob => evaluator?.Glob ?? throw new InvalidOperationException("Match is not complete.");
+
+        /// <summary>
         /// Get values of variables matched by the glob.
         /// </summary>
         public IEnumerable<MatchedVariable> GetVariables()

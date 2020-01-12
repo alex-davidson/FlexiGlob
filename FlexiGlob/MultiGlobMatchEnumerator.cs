@@ -25,14 +25,14 @@ namespace FlexiGlob
         {
             var factory = new GlobMatchFactory(hierarchy.CaseSensitive);
 
-            var startIncludes = includes.Select(i => new Matched(i, factory.Start(i.Segments))).ToArray();
-            var startExcludes = excludes.Select(e => new Matched(e, factory.Start(e.Segments))).ToArray();
+            var startIncludes = includes.Select(factory.Start).ToArray();
+            var startExcludes = excludes.Select(factory.Start).ToArray();
             var worklist = new Worklist<State<T>>();
             worklist.Add(new State<T>(hierarchy.Root, startIncludes, startExcludes));
 
-            var newExcludes = new List<Matched>();
-            var newIncludes = new List<Matched>();
-            var matches = new List<Matched>();
+            var newExcludes = new List<GlobMatch>();
+            var newIncludes = new List<GlobMatch>();
+            var matches = new List<GlobMatch>();
 
             while (worklist.TryTake(out var pair))
             {
@@ -47,7 +47,7 @@ namespace FlexiGlob
                     matches.Clear();
                     foreach (var exclude in pair.Exclude)
                     {
-                        var newState = exclude.Details.MatchChild(name);
+                        var newState = exclude.MatchChild(name);
                         if (newState.IsMatch) isExcluded = true;
                         if (newState.MatchesAllChildren)
                         {
@@ -56,17 +56,17 @@ namespace FlexiGlob
                         }
                         if (newState.CanContinue && isContainer)
                         {
-                            newExcludes.Add(new Matched(exclude.Glob, newState));
+                            newExcludes.Add(newState);
                         }
                     }
                     if (isEntireSubtreeExcluded) continue;  // Early exit: a recursive wildcard excludes this entire subtree.
                     foreach (var include in pair.Include)
                     {
-                        var newState = include.Details.MatchChild(name);
-                        if (!isExcluded && newState.IsMatch) matches.Add(new Matched(include.Glob, newState));
+                        var newState = include.MatchChild(name);
+                        if (!isExcluded && newState.IsMatch) matches.Add(newState);
                         if (newState.CanContinue && isContainer)
                         {
-                            newIncludes.Add(new Matched(include.Glob, newState));
+                            newIncludes.Add(newState);
                         }
                     }
                     if (matches.Any())
@@ -80,9 +80,9 @@ namespace FlexiGlob
                 }
             }
 
-            string GetCommonPrefix(Matched[] states)
+            string GetCommonPrefix(GlobMatch[] states)
             {
-                var prefixes = states.Select(s => s.Details.GetPrefixFilter()).ToList();
+                var prefixes = states.Select(s => s.GetPrefixFilter()).ToList();
                 return Util.LongestCommonPrefix(prefixes, hierarchy.CaseSensitive);
             }
         }
@@ -90,10 +90,10 @@ namespace FlexiGlob
         private struct State<T>
         {
             public T Item { get; }
-            public Matched[] Include { get; }
-            public Matched[] Exclude { get; }
+            public GlobMatch[] Include { get; }
+            public GlobMatch[] Exclude { get; }
 
-            public State(T item, Matched[] include, Matched[] exclude)
+            public State(T item, GlobMatch[] include, GlobMatch[] exclude)
             {
                 Item = item;
                 Include = include;
@@ -103,26 +103,14 @@ namespace FlexiGlob
 
         public struct MultiMatch<T>
         {
-            public MultiMatch(T item, Matched[] sources)
+            public MultiMatch(T item, GlobMatch[] details)
             {
                 Item = item;
-                Sources = sources;
-            }
-
-            public T Item { get; }
-            public Matched[] Sources { get; }
-        }
-
-        public struct Matched
-        {
-            public Matched(Glob glob, GlobMatch details)
-            {
-                Glob = glob;
                 Details = details;
             }
 
-            public Glob Glob { get; set; }
-            public GlobMatch Details { get; }
+            public T Item { get; }
+            public GlobMatch[] Details { get; }
         }
     }
 }

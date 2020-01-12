@@ -199,7 +199,7 @@ namespace FlexiGlob.UnitTests
 
             var hdmiMatch = matches.Single(m => m.Item.Name == "hdmi");
 
-            Assert.That(hdmiMatch.Sources.Select(s => s.Glob).ToArray(), Is.EquivalentTo(includes));
+            Assert.That(hdmiMatch.Details.Select(s => s.Glob).ToArray(), Is.EquivalentTo(includes));
         }
 
         private struct SimpleMatchable
