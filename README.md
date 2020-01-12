@@ -55,7 +55,7 @@ foreach (var match in new GlobMatchEnumerator(glob).EnumerateMatches(filesystem)
 }
 ```
 
-There is also a MultiGlobMatchEnumerator which evaluates multiple globs in parallel and can treat some as exclusions.
+There is also a MultiGlobMatchEnumerator which evaluates multiple globs as inclusion or exclusion rules as it explores a hierarchy.
 
 ### Advanced
 

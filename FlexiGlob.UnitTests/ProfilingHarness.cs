@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using NUnit.Framework;
 
 namespace FlexiGlob.UnitTests
@@ -28,7 +26,9 @@ namespace FlexiGlob.UnitTests
             };
 
             var hierarchy = new FileSystemHierarchy(new DirectoryInfo("C:\\"), false);
-            var enumerator = new MultiGlobMatchEnumerator(includes, excludes);
+            var enumerator = new MultiGlobMatchEnumerator()
+                .Exclude(excludes)
+                .Include(includes);
 
             var count = enumerator.EnumerateMatches(hierarchy).Count();
 
