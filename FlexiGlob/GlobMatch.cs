@@ -33,15 +33,15 @@ namespace FlexiGlob
         /// <summary>
         /// True if this represents a complete match of the entire glob.
         /// </summary>
-        public bool IsMatch => flags.HasFlag(MatchFlags.IsMatch);
+        public bool IsMatch => flags.HasMatchFlag(MatchFlags.IsMatch);
         /// <summary>
         /// True if this could potentially match a child of the current location.
         /// </summary>
-        public bool CanContinue => flags.HasFlag(MatchFlags.CanContinue);
+        public bool CanContinue => flags.HasMatchFlag(MatchFlags.CanContinue);
         /// <summary>
         /// True if every child, recursively, will match as well.
         /// </summary>
-        public bool MatchesAllChildren => flags.HasFlag(MatchFlags.MatchesAllChildren);
+        public bool MatchesAllChildren => flags.HasMatchFlag(MatchFlags.MatchesAllChildren);
 
         /// <summary>
         /// Attempt to match the specified child of our current location.
@@ -71,7 +71,7 @@ namespace FlexiGlob
         public IEnumerable<MatchedVariable> GetVariables()
         {
             if (!IsMatch) throw new InvalidOperationException("Match is not complete.");
-            return matchStates.First(m => m.Flags.HasFlag(MatchFlags.IsMatch)).GetVariables();
+            return matchStates.First(m => m.Flags.HasMatchFlag(MatchFlags.IsMatch)).GetVariables();
         }
     }
 }
