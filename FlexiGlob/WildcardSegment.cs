@@ -6,7 +6,7 @@ using FlexiGlob.Matching;
 
 namespace FlexiGlob
 {
-    public class WildcardSegment : Segment
+    public sealed class WildcardSegment : Segment
     {
         public string Regex { get; }
         public override string Prefix { get; }

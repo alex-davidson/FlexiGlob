@@ -1,6 +1,6 @@
 ﻿namespace FlexiGlob
 {
-    public class UNCRootSegment : RootSegment
+    public sealed class UNCRootSegment : RootSegment
     {
         public string Machine { get; }
         public string Share { get; }
