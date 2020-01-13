@@ -73,8 +73,8 @@ namespace FlexiGlob
 
             public Impl(string regexString)
             {
-                CaseSensitiveRegex = new Regex(regexString, RegexOptions.ExplicitCapture);
-                CaseInsensitiveRegex = new Regex(regexString, RegexOptions.ExplicitCapture | RegexOptions.IgnoreCase);
+                CaseSensitiveRegex = new Regex(regexString, RegexOptions.Compiled | RegexOptions.ExplicitCapture);
+                CaseInsensitiveRegex = new Regex(regexString, RegexOptions.Compiled | RegexOptions.ExplicitCapture | RegexOptions.IgnoreCase);
                 var names = new List<string>();
                 foreach (var name in CaseSensitiveRegex.GetGroupNames())
                 {
