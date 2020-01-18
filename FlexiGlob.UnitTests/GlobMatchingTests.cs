@@ -4,7 +4,7 @@ using NUnit.Framework;
 namespace FlexiGlob.UnitTests
 {
     [TestFixture]
-    public class GlobMatcherTests
+    public class GlobMatchingTests
     {
         [Test]
         public void FixedSegmentMatches()
