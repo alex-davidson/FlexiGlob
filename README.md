@@ -56,6 +56,11 @@ The concept of a hierarchy of string-named objects is abstracted by `IGlobMatcha
 
 The GlobMatchEnumerator and MultiGlobMatchEnumerator try to skip entire subtrees when a match is not possible.
 
+It may be useful to use one set of globs to efficiently collect results from a hierarchy, then postfilter that
+set using another set of globs. This use case is supported by the MultiGlobMatchFilter, which applies inclusion
+and exclusion rules in order to a GlobMatch in a similar manner to the MultiGlobMatchEnumerator. Note that the
+filter *does not* add to the Details collection of the match, so eg. variables in your filter will not be parsed.
+
 ### I want to: check if a single glob matches one or more relative paths, which I already have in a list.
 
 ```

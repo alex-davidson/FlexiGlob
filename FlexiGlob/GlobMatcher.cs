@@ -1,22 +1,22 @@
-﻿namespace FlexiGlob
+﻿using System.Collections.Generic;
+
+namespace FlexiGlob
 {
     /// <summary>
     /// Matches individual paths against a glob's relative component.
     /// </summary>
     public class GlobMatcher
     {
-        private readonly Glob glob;
-        private readonly bool caseSensitive;
+        private readonly GlobMatch start;
 
         public GlobMatcher(Glob glob, bool caseSensitive)
         {
-            this.glob = glob;
-            this.caseSensitive = caseSensitive;
+            start = new GlobMatchFactory(caseSensitive).Start(glob);
         }
 
-        public GlobMatch Match(params string[] pathSegments)
+        public GlobMatch Match(IEnumerable<string> pathSegments)
         {
-            var state = new GlobMatchFactory(caseSensitive).Start(glob);
+            var state = start;
             foreach (var pathSegment in pathSegments)
             {
                 if (!state.CanContinue) return GlobMatch.NoMatch;
@@ -25,6 +25,6 @@
             return state;
         }
 
-        public bool IsMatch(params string[] pathSegments) => Match(pathSegments).IsMatch;
+        public bool IsMatch(IEnumerable<string> pathSegments) => Match(pathSegments).IsMatch;
     }
 }
