@@ -42,7 +42,7 @@ namespace FlexiGlob.Matching
                 var flags = MatchFlags.CanContinue;
                 if (isComplete) flags |= MatchFlags.IsMatch | MatchFlags.MatchesAllChildren;
                 // Match this segment without consuming it:
-                nextMatchStates.Add(new MatchState(state, index, flags, MatchedVariable.None));
+                nextMatchStates.Add(new MatchState(state, index, flags, pathSegment, MatchedVariable.None));
                 // Maybe skip this segment and match the next one instead:
                 EvaluateMatches(nextMatchStates, pathSegment, state, index + 1);
             }
@@ -52,7 +52,7 @@ namespace FlexiGlob.Matching
                 if (!match.Success) return;
 
                 var flags = isComplete ? MatchFlags.IsMatch : MatchFlags.CanContinue;
-                nextMatchStates.Add(new MatchState(state, index + 1, flags, match.Variables));
+                nextMatchStates.Add(new MatchState(state, index + 1, flags, pathSegment, match.Variables));
             }
         }
 

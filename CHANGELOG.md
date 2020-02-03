@@ -2,6 +2,7 @@
 
 ## Alpha versions
 
+* 0.8.0: Expose the relative path of the match as a series of path segments.
 * 0.7.0: More convenience APIs.
 * 0.6.2: Really obvious optimisation.
 * 0.6.1: More trivial micro-optimisations.

@@ -85,6 +85,7 @@ foreach (var match in new GlobMatchEnumerator(glob).EnumerateMatches(filesystem)
     Console.WriteLine(match.Item.FullName);
     // Extra information is available via Details:
     var variables = match.Details.GetVariables();
+    var relativePath = string.Join("/", match.Details.GetPathSegments());
 }
 ```
 
@@ -107,6 +108,7 @@ foreach (var match in matchEnumerator.EnumerateMatches(filesystem))
     Console.WriteLine(match.Item.FullName);
     // Extra information is available via Details:
     var variables = match.Details.GetVariables();
+    var relativePath = string.Join("/", match.Details.GetPathSegments());
 }
 ```
 

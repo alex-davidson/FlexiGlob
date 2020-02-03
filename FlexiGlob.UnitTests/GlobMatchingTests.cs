@@ -16,6 +16,7 @@ namespace FlexiGlob.UnitTests
 
             Assert.That(child.IsMatch, Is.True);
             Assert.That(child.CanContinue, Is.False);
+            Assert.That(child.GetPathSegments().ToArray(), Is.EqualTo(new [] { "directory" }));
         }
 
         [Test]
@@ -51,6 +52,7 @@ namespace FlexiGlob.UnitTests
 
             Assert.That(child.IsMatch, Is.True);
             Assert.That(child.CanContinue, Is.False);
+            Assert.That(child.GetPathSegments().ToArray(), Is.EqualTo(new [] { "directory" }));
         }
 
         [Test]
@@ -93,6 +95,7 @@ namespace FlexiGlob.UnitTests
 
             Assert.That(child.IsMatch, Is.True);
             Assert.That(child.CanContinue, Is.False);
+            Assert.That(child.GetPathSegments().ToArray(), Is.EqualTo(new [] { "directory2020" }));
             Assert.That(child.GetVariables().ToArray(), Is.EqualTo(new [] { new MatchedVariable("yyyy", "2020") }));
         }
 
@@ -106,6 +109,7 @@ namespace FlexiGlob.UnitTests
 
             Assert.That(child.IsMatch, Is.True);
             Assert.That(child.CanContinue, Is.True);
+            Assert.That(child.GetPathSegments().ToArray(), Is.EqualTo(new [] { "directory" }));
         }
 
         [Test]
@@ -118,6 +122,7 @@ namespace FlexiGlob.UnitTests
 
             Assert.That(child.IsMatch, Is.True);
             Assert.That(child.CanContinue, Is.True);
+            Assert.That(child.GetPathSegments().ToArray(), Is.EqualTo(new [] { "a", "b", "c" }));
         }
 
         [Test]
@@ -141,6 +146,7 @@ namespace FlexiGlob.UnitTests
 
             Assert.That(child.IsMatch, Is.True);
             Assert.That(child.CanContinue, Is.True);
+            Assert.That(child.GetPathSegments().ToArray(), Is.EqualTo(new [] { "a", "b" }));
         }
 
         [Test]
@@ -150,10 +156,17 @@ namespace FlexiGlob.UnitTests
             var start = new GlobMatchFactory(true).Start(glob);
 
             Assert.That(ApplyToHierarchy(start, "a", "b", "c").IsMatch, Is.True);
+            Assert.That(ApplyToHierarchy(start, "a", "b", "c").GetPathSegments().ToArray(), Is.EqualTo(new [] { "a", "b", "c" }));
+
             Assert.That(ApplyToHierarchy(start, "a", "b", "c", "d").IsMatch, Is.False);
+
             Assert.That(ApplyToHierarchy(start, "a", "b", "c", "d", "c").IsMatch, Is.True);
+            Assert.That(ApplyToHierarchy(start, "a", "b", "c", "d", "c").GetPathSegments().ToArray(), Is.EqualTo(new [] { "a", "b", "c", "d", "c" }));
+
             Assert.That(ApplyToHierarchy(start, "a", "c").IsMatch, Is.False);
+
             Assert.That(ApplyToHierarchy(start, "a", "d", "b", "c").IsMatch, Is.True);
+            Assert.That(ApplyToHierarchy(start, "a", "d", "b", "c").GetPathSegments().ToArray(), Is.EqualTo(new [] { "a", "d", "b", "c" }));
         }
 
         private GlobMatch ApplyToHierarchy(GlobMatch child, params string[] pathSegments) => pathSegments.Aggregate(child, (m, p) => m.MatchChild(p));

@@ -68,5 +68,11 @@ namespace FlexiGlob
             if (!IsMatch) throw new InvalidOperationException("Match is not complete.");
             return matchStates.First(m => m.Flags.HasMatchFlag(MatchFlags.IsMatch)).GetVariables();
         }
+
+        public IEnumerable<string> GetPathSegments()
+        {
+            if (!IsMatch) throw new InvalidOperationException("Match is not complete.");
+            return matchStates.First(m => m.Flags.HasMatchFlag(MatchFlags.IsMatch)).GetAncestry().Reverse();
+        }
     }
 }
