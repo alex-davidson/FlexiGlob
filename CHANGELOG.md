@@ -2,6 +2,7 @@
 
 ## Alpha versions
 
+* 0.10.0: Add some utilities for handling temporary directories.
 * 0.9.0: Add support for filtering the output of an enumerator.
 * 0.8.0: Expose the relative path of the match as a series of path segments.
 * 0.7.0: More convenience APIs.
@@ -19,3 +20,9 @@
 Initial release. Includes glob parser and matcher, and a token effort towards ergonomics.
 
 * Targets .NET Standard 2.1 only.
+
+# FlexiGlob.Zip: Changelog
+
+## Version 0.1.0
+
+Initial release. Basic support for recursively exploring a hierarchy of ZIP archives.

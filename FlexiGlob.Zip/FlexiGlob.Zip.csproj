@@ -4,9 +4,13 @@
     <TargetFrameworks>netstandard1.3;netstandard2.1</TargetFrameworks>
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>0.10.0</Version>
+    <Version>0.1.0</Version>
     <PackageProjectUrl>https://github.com/alex-davidson/FlexiGlob</PackageProjectUrl>
   </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FlexiGlob\FlexiGlob.csproj" />
+  </ItemGroup>
 
   <Import Project="..\Common.props" />
 

@@ -47,5 +47,18 @@ namespace FlexiGlob
             }
             return prefix.RangeTo(length);
         }
+
+        internal static string ToHexString(byte[] bytes)
+        {
+            const string lookup = "0123456789abcdef";
+            var chars = new char[2 * bytes.Length];
+            for (var i = 0; i < bytes.Length; i++)
+            {
+                var j = i * 2;
+                chars[j] = lookup[bytes[i] & 0xf];
+                chars[j + 1] = lookup[(bytes[i] >> 4) & 0xf];
+            }
+            return new string(chars);
+        }
     }
 }
