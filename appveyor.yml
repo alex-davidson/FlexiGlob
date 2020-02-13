@@ -17,7 +17,7 @@ test_script:
   - ps: (New-Object 'System.Net.WebClient').UploadFile("https://ci.appveyor.com/api/testresults/xunit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path .\FlexiGlob.UnitTests.net48.xml))
 
 artifacts:
-  - path: FlexiGlob\bin\$(configuration)\FlexiGlob.*.nupkg
+  - path: FlexiGlob*\bin\$(configuration)\FlexiGlob.*.nupkg
 
 notifications:
   # Email
