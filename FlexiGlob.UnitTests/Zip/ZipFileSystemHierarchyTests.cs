@@ -150,5 +150,59 @@ namespace FlexiGlob.UnitTests.Zip
                 }
             }
         }
+
+        [Test]
+        public void CanFilterOutZipfileMatchesInCaller()
+        {
+            using (var temporaryDirectory = new TemporaryDirectory())
+            {
+                using (var zip = new ZipArchive(File.OpenWrite(temporaryDirectory.GetPath("test.zip")), ZipArchiveMode.Create))
+                {
+                    var nested = zip.CreateEntry("inside/archive.zip");
+                    using (var nestedZip = new ZipArchive(nested.Open(), ZipArchiveMode.Create))
+                    {
+                        nestedZip.CreateEntry("directory/nestedFile.txt");
+                    }
+                }
+
+                using (var buffer = new TemporaryDirectory())
+                {
+                    var hierarchy = new ZipFileSystemHierarchy(new DirectoryInfo(temporaryDirectory.FullPath), buffer, suppressZipExtensions: false, caseSensitive: false);
+                    var matcher = new GlobMatchEnumerator(new GlobParser().Parse("**"));
+
+                    var results = matcher.EnumerateMatches(hierarchy).Where(m => m.Item is FileInfo && !hierarchy.IsZipFile(m.Item)).ToArray();
+
+                    Assert.That(results, Has.Length.EqualTo(1));
+                    Assert.That(results.Single().Details.GetPathSegments(), Is.EqualTo(new [] { "test.zip", "inside", "archive.zip", "directory", "nestedFile.txt" }));
+                }
+            }
+        }
+
+        [Test]
+        public void CanUseZipFileAsHierarchyRoot()
+        {
+            using (var temporaryDirectory = new TemporaryDirectory())
+            {
+                using (var zip = new ZipArchive(File.OpenWrite(temporaryDirectory.GetPath("test.zip")), ZipArchiveMode.Create))
+                {
+                    var nested = zip.CreateEntry("inside/archive.zip");
+                    using (var nestedZip = new ZipArchive(nested.Open(), ZipArchiveMode.Create))
+                    {
+                        nestedZip.CreateEntry("directory/nestedFile.txt");
+                    }
+                }
+
+                using (var buffer = new TemporaryDirectory())
+                {
+                    var hierarchy = new ZipFileSystemHierarchy(new FileInfo(temporaryDirectory.GetPath("test.zip")), buffer, suppressZipExtensions: false, caseSensitive: false);
+                    var matcher = new GlobMatchEnumerator(new GlobParser().Parse("**/*.txt"));
+
+                    var results = matcher.EnumerateMatches(hierarchy).ToArray();
+
+                    Assume.That(results, Has.Length.EqualTo(1));
+                    Assert.That(results.Single().Details.GetPathSegments(), Is.EqualTo(new [] { "inside", "archive.zip", "directory", "nestedFile.txt" }));
+                }
+            }
+        }
     }
 }

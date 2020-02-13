@@ -23,6 +23,10 @@ Initial release. Includes glob parser and matcher, and a token effort towards er
 
 # FlexiGlob.Zip: Changelog
 
+## Alpha versions
+
+* 0.2.0: Expose a method on the hierarchy which identifies ZIP files.
+
 ## Version 0.1.0
 
 Initial release. Basic support for recursively exploring a hierarchy of ZIP archives.

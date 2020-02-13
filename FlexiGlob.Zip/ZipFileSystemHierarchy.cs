@@ -41,6 +41,8 @@ namespace FlexiGlob.Zip
             return new FileSystemHierarchy(extracted, CaseSensitive).GetChildrenMatchingPrefix(extracted, prefix);
         }
 
+        public bool IsZipFile(FileSystemInfo item) => IsZipFile(item, out _);
+
         private string FilterName(FileSystemInfo item)
         {
             if (!SuppressZipExtensions) return item.Name;
