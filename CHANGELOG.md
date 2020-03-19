@@ -2,6 +2,7 @@
 
 ## Alpha versions
 
+* 0.10.1: Fix temporary directory cleanup.
 * 0.10.0: Add some utilities for handling temporary directories.
 * 0.9.0: Add support for filtering the output of an enumerator.
 * 0.8.0: Expose the relative path of the match as a series of path segments.

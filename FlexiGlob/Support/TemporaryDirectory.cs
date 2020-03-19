@@ -33,7 +33,7 @@ namespace FlexiGlob.Support
         {
             if (Directory.Exists(FullPath))
             {
-                Directory.Delete(FullPath);
+                Directory.Delete(FullPath, true);
             }
         }
 
