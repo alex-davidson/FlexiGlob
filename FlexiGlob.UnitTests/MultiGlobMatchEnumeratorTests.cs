@@ -261,6 +261,92 @@ namespace FlexiGlob.UnitTests
                 }));
         }
 
+        [Test]
+        public void MatcherWithOnlyExclusionRules_MatchesNothing()
+        {
+            var hierarchy = new TestHierarchy(
+                new SimpleMatchable("root",
+                    new SimpleMatchable("dev",
+                        new SimpleMatchable("hda"),
+                        new SimpleMatchable("hda1"),
+                        new SimpleMatchable("hdb"),
+                        new SimpleMatchable("hdb1"),
+                        new SimpleMatchable("hdb2")),
+                    new SimpleMatchable("home",
+                        new SimpleMatchable("me",
+                            new SimpleMatchable("hdmi")),
+                        new SimpleMatchable("you")),
+                    new SimpleMatchable("var")));
+
+            var parser = new GlobParser();
+
+            var matches = new MultiGlobMatchEnumerator()
+                .Exclude(parser.Parse("dev/**"))
+                .Exclude(parser.Parse("**/hd[am]?"))
+                .EnumerateMatches(hierarchy).ToArray();
+
+            Assert.That(matches.Select(m => m.Item.Name).ToArray(), Is.Empty);
+        }
+
+        [Test]
+        public void MatcherWithOnlyExclusionRulesMatchingInitially_MatchesNothing()
+        {
+            var hierarchy = new TestHierarchy(
+                new SimpleMatchable("root",
+                    new SimpleMatchable("dev",
+                        new SimpleMatchable("hda"),
+                        new SimpleMatchable("hda1"),
+                        new SimpleMatchable("hdb"),
+                        new SimpleMatchable("hdb1"),
+                        new SimpleMatchable("hdb2")),
+                    new SimpleMatchable("home",
+                        new SimpleMatchable("me",
+                            new SimpleMatchable("hdmi")),
+                        new SimpleMatchable("you")),
+                    new SimpleMatchable("var")));
+
+            var parser = new GlobParser();
+
+            var matches = new MultiGlobMatchEnumerator()
+                .Exclude(parser.Parse("dev/**"))
+                .Exclude(parser.Parse("**/hd[am]?"))
+                .Include(parser.Parse("nothing/**"))
+                .EnumerateMatches(hierarchy).ToArray();
+
+            Assert.That(matches.Select(m => m.Item.Name).ToArray(), Is.Empty);
+        }
+
+        [Test]
+        public void MatcherWithOnlyRecursiveExclusionRulesMatchingWithinASubtree_DoesNotMatchWithinThatSubtree()
+        {
+            var hierarchy = new TestHierarchy(
+                new SimpleMatchable("root",
+                    new SimpleMatchable("dev",
+                        new SimpleMatchable("hda"),
+                        new SimpleMatchable("hda1"),
+                        new SimpleMatchable("hdb"),
+                        new SimpleMatchable("hdb1"),
+                        new SimpleMatchable("hdb2")),
+                    new SimpleMatchable("home",
+                        new SimpleMatchable("me",
+                            new SimpleMatchable("hdmi")),
+                        new SimpleMatchable("you")),
+                    new SimpleMatchable("var")));
+
+            var parser = new GlobParser();
+
+            var matches = new MultiGlobMatchEnumerator()
+                .Exclude(parser.Parse("d*/**"))
+                .Include(parser.Parse("d*"))
+                .EnumerateMatches(hierarchy).ToArray();
+
+            Assert.That(matches.Select(m => m.Item.Name).ToArray(),
+                Is.EquivalentTo(new []
+                {
+                    "dev",
+                }));
+        }
+
         private struct SimpleMatchable
         {
             public string Name { get; }

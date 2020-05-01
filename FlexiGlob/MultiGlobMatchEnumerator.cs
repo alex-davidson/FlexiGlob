@@ -48,6 +48,7 @@ namespace FlexiGlob
             while (worklist.TryTake(out var pair))
             {
                 var includePrefix = GetCommonPrefix(pair.Current.Where(c => !c.Exclude));
+                if (includePrefix == null) continue;    // No inclusions remaining for this node.
                 foreach (var child in hierarchy.GetChildrenMatchingPrefix(pair.Item, includePrefix))
                 {
                     var name = hierarchy.GetName(child);
@@ -89,9 +90,10 @@ namespace FlexiGlob
                 }
             }
 
-            string GetCommonPrefix(IEnumerable<Rule> states)
+            string? GetCommonPrefix(IEnumerable<Rule> states)
             {
                 var prefixes = states.Select(s => s.Details.GetPrefixFilter()).ToList();
+                if (prefixes.Count == 0) return null;
                 return Util.LongestCommonPrefix(prefixes, hierarchy.CaseSensitive);
             }
         }
